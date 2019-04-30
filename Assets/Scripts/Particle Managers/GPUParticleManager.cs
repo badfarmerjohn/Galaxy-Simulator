@@ -1,14 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.VFX;
 
 public class GPUParticleManager : MonoBehaviour
 {
-    public VisualEffect visualEffect;
-
-    //VFXEventAttribute spawn_attr;
+    VisualEffect visualEffect;
 
     Texture2D new_point_positions;
     Texture2D new_point_scales;
@@ -17,6 +16,13 @@ public class GPUParticleManager : MonoBehaviour
     void Start()
     {
         //spawn_attr = visualEffect.CreateVFXEventAttribute();
+        visualEffect = GetComponent<VisualEffect>();
+        if (visualEffect == null)
+        {
+            visualEffect = gameObject.AddComponent<VisualEffect>();
+        }
+        visualEffect.visualEffectAsset = AssetDatabase.LoadAssetAtPath<VisualEffectAsset>("Assets/Prefabs/GPUParticles.vfx");
+
         new_point_positions = new Texture2D(SystemInfo.maxTextureSize, 1, TextureFormat.RGBAFloat, false);
         new_point_scales = new Texture2D(SystemInfo.maxTextureSize, 1, TextureFormat.RGBAFloat, false);
     }
