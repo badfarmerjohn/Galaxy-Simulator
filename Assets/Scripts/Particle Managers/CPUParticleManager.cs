@@ -97,6 +97,11 @@ public class CPUParticleManager : MonoBehaviour
         }
     }
 
+    public void Clear()
+    {
+        OnParticlesChanged(0);
+    }
+
     public void SetDefaultColor(Color color)
     {
         ps_material.SetColor("_Color", color);

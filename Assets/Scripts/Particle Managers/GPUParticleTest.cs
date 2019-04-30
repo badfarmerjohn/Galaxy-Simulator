@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class GPUParticleTest : MonoBehaviour
 {
+    public int amount = 1000;
+
     GPUParticleManager manager;
 
-    int amount = 2;
+    int iteration = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -22,10 +24,13 @@ public class GPUParticleTest : MonoBehaviour
             Vector3[] particles = new Vector3[amount];
             for (int i = 0; i < particles.Length; i++)
             {
-                particles[i] = 1 * (new Vector3(Random.value, Random.value, Random.value));
+                particles[i] = new Vector3(Random.value, Random.value, Random.value);
             }
             manager.AddPoints(particles);
-            //amount += 10;
+        }
+        if (Input.GetKeyUp(KeyCode.Delete))
+        {
+            manager.Clear();
         }
     }
 }
