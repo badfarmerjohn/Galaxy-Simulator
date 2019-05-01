@@ -26,7 +26,12 @@ public class GPUParticleTest : MonoBehaviour
             {
                 particles[i] = new Vector3(Random.value, Random.value, Random.value);
             }
-            manager.AddPoints(particles);
+            Color[] colors = new Color[amount];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = Random.ColorHSV();
+            }
+            manager.AddPoints(particles, colors: colors);
         }
         if (Input.GetKeyUp(KeyCode.Delete))
         {
