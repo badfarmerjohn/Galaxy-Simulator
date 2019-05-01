@@ -8,6 +8,7 @@ grayscale = rgb2gray(original)
 print(grayscale.shape)
 
 
+
 '''
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 ax = axes.ravel()
