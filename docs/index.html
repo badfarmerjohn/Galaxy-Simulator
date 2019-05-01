@@ -29,15 +29,15 @@
 
 <h2 align="middle">Status Report</h2>
 
-<p>We have accomplished a basic galaxy simulator using unity. As of right now, the galaxy model is based off the gaussian distribution on the x and z axis. For the y axis, we uniformly sample in the range of the guassian distribution. The preliminary results are that ... The progress relative to our plans is that we have yet to make the galaxy very visually stunning or compelling. And as of now, we are only using one mathematical model to model our galaxies. We have plans to implement more models of more variety. In terms of efficieny, our current code seems to be on the right track. The GPU-based code for visual effects graph is much more efficient than the CPU-based code for simulating the particles in the galaxy. 
+<p>We have accomplished the foundational behavior for the camera in Unity, CPU-based particles (which will make up the physically simulated particles in our galaxy), and GPU particles (which will be used for realistic visual effects which are not part of the physical simulation). The CPU particles will have their positions updated by computing the dynamics of an N-body gravitational system. The GPU particles will be used to mimic real phenomena such as space dust which are present in the simulation but do not affect the dynamics of the N-body system. The progress relative to our plans is that we have yet to make the galaxy very visually stunning or compelling. And as of now, we are only using one mathematical model to model our galaxies. We have plans to implement more models of more variety. In terms of efficieny, our current code seems to be on the right track. The GPU-based code for visual effects graph is much more efficient than the CPU-based code for simulating the particles in the galaxy. 
 </p>
 
 <h2 align="middle">Milestone Video</h2>
-`
+
 <h2 align="middle">Presentation Slides</h2>
 
 <div align="middle">
-  <a href="https://docs.google.com/presentation/d/1xu2ZrHzIvKNY5ZIkZvRPSkFjklSIQg1v50egWpnesqE/edit?usp=sharing">link to slides</a>
+<a href="https://docs.google.com/presentation/d/1xu2ZrHzIvKNY5ZIkZvRPSkFjklSIQg1v50egWpnesqE/edit?usp=sharing">link to slides</a>
 </div>
 
 
