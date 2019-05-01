@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class PhysicalParticle
 {
-  float size;
-  float mass;
-  Vector3 position;
-  Color color;
+  public float size;
+  public float mass;
+  public Vector3 position;
+  public Color color;
 
 }

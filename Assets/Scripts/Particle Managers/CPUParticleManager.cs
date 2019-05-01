@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Assertions;
 
 public class CPUParticleManager : MonoBehaviour
 {
@@ -43,44 +42,53 @@ public class CPUParticleManager : MonoBehaviour
         }
     }
 
-    public ParticleSystem.Particle[] GetParticles()
-    {
-        return _particles;
-    }
-
     public int Size()
     {
         return num_particles;
     }
 
-    public void SetParticles(ParticleSystem.Particle[] particles, int num_particles)
+    public void SetParticles(PhysicalParticle[] particles)
     {
-        this._particles = particles;
-        OnParticlesChanged(num_particles);
+        EnsureSize(particles.Length);
+        for (int i = 0; i < particles.Length; i++)
+        {
+            _particles[i].position = particles[i].position;
+            _particles[i].startColor = particles[i].color;
+            _particles[i].startSize = particles[i].size;
+        }
+        OnParticlesChanged(particles.Length);
     }
 
-    public void AddParticle(ParticleSystem.Particle new_particle)
+    public void AddParticles(PhysicalParticle[] particles, int start_ind, int length)
     {
-        EnsureSize(new_particle_count + 1);
-        _particles[num_particles] = new_particle;
-        OnParticlesChanged(num_particles + 1);
+        EnsureSize(num_particles + length);
+        for (int i = 0, j = start_ind, k = num_particles; i < length; i++, j++, k++)
+        {
+            _particles[k].position = particles[j].position;
+            _particles[k].startColor = particles[j].color;
+            _particles[k].startSize = particles[j].size;
+        }
+        OnParticlesChanged(num_particles + length);
     }
 
-    public void AddParticles(ParticleSystem.Particle[] new_particles)
+    public void UpdateParticlePositions(PhysicalParticle[] particles)
     {
-        int new_particle_count = num_particles + new_particles.Length;
-        EnsureSize(num_particles + new_particles.Length);
-        System.Array.Copy(new_particles, 0, _particles, num_particles, new_particles.Length);
-        OnParticlesChanged(new_particle_count);
+        Assert.AreEqual(particles.Length, _particles.Length,
+            "Number of PHysicalParticles must == number of ParticleSystem.Particles");
+        for (int i = 0; i < particles.Length; i++)
+        {
+            _particles[i].position = particles[i].position;
+        }
+        OnParticlesChanged(particles.Length);
     }
 
-    public void OnParticlesChanged(int new_particle_count)
+    void OnParticlesChanged(int new_particle_count)
     {
         this.new_particle_count = new_particle_count;
         needs_update = true;
     }
 
-    public void EnsureSize(int new_size)
+    void EnsureSize(int new_size)
     {
         ParticleSystem.Particle[] new_container = _particles;
         while (num_particles >= new_container.Length)

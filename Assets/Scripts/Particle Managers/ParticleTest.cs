@@ -17,11 +17,11 @@ public class ParticleTest : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            ParticleSystem.Particle p = new ParticleSystem.Particle();
+            PhysicalParticle p = new PhysicalParticle();
             p.position = new Vector3(Random.value, Random.value, Random.value);
-            p.startSize = 1f;
-            p.startColor = new Color(1, 0, 0, 0.2f);
-            manager.AddParticle(p);
+            p.size = 1f;
+            p.color = new Color(1, 0, 0, 0.2f);
+            manager.AddParticles(new PhysicalParticle[] { p }, 0, 1);
         }
     }
 }
