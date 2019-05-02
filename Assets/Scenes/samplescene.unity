@@ -480,9 +480,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed48266ce124cf9449967fbf67430e7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  galaxyCPUFile: Assets/Galaxy Files/galaxy_pix_array.txt
-  numCpuParticles: 0
-  numGpuParticles: 1000
+  galaxyCPUFile: Assets/Galaxy Files/galaxy - edited_pix_array.txt
+  galaxyHMeanFile: Assets/Galaxy Files/galaxy_h_mean_array.txt
+  galaxySMeanFile: Assets/Galaxy Files/galaxy_s_mean_array.txt
+  galaxyVMeanFile: Assets/Galaxy Files/galaxy_v_mean_array.txt
+  galaxyHStdFile: Assets/Galaxy Files/galaxy_h_std_array.txt
+  galaxySStdFile: Assets/Galaxy Files/galaxy_s_std_array.txt
+  galaxyVStdFile: Assets/Galaxy Files/galaxy_v_std_array.txt
+  numCpuParticles: 1000
+  numGpuParticles: 0
   cellSize: 0.05
 --- !u!114 &797600213
 MonoBehaviour:

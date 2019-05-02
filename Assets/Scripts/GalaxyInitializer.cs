@@ -52,6 +52,7 @@ public class GalaxyInitializer : MonoBehaviour
         if (!added)
         {
             cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
+            GenerateGpuParticles(numGpuParticles);
             added = true;
         }
 

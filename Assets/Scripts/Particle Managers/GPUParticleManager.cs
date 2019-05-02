@@ -67,6 +67,7 @@ public class GPUParticleManager : MonoBehaviour
             visualEffect = gameObject.AddComponent<VisualEffect>();
         }
         visualEffect.visualEffectAsset = AssetDatabase.LoadAssetAtPath<VisualEffectAsset>("Assets/Prefabs/GPUParticles.vfx");
+        visualEffect.SetVector3("center_of_rotation", transform.position);
 
         new_point_positions = new Texture2D(SystemInfo.maxTextureSize, 1, TextureFormat.RGBAFloat, false);
         new_point_colors = new Texture2D(SystemInfo.maxTextureSize, 1, TextureFormat.RGBAFloat, false);
