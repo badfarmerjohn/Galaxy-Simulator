@@ -165,14 +165,14 @@ public class CPUParticleManager : MonoBehaviour
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         renderer.receiveShadows = false;
 
-        renderer.renderMode = ParticleSystemRenderMode.Mesh;
+        renderer.renderMode = ParticleSystemRenderMode.Billboard;
 
-        GameObject gameObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        renderer.mesh = gameObj.GetComponent<MeshFilter>().mesh;
-        Destroy(gameObj);
+        //GameObject gameObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //renderer.mesh = gameObj.GetComponent<MeshFilter>().mesh;
+        //Destroy(gameObj);
         renderer.enableGPUInstancing = true;
 
-        renderer.alignment = ParticleSystemRenderSpace.World;
+        renderer.alignment = ParticleSystemRenderSpace.Facing;
 
         ps_material = new Material(Shader.Find(shader));
         renderer.material = ps_material;
