@@ -8,9 +8,13 @@ import sys
 #     h, w = arr.shape
 #     return arr.reshape(h // nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1, nrows, ncols)
 
-def blockshaped(arr, block_height, block_width):
+def blockshaped(arr, num_tile_rows, num_tile_cols):
     h, w = arr.shape
-    return arr.reshape(block_height, h // block_height, block_width, -1).transpose((0, 2, 1, 3)).reshape(block_height, block_width, -1)
+    return arr.reshape(num_tile_rows, h // num_tile_rows, num_tile_cols, -1).transpose((0, 2, 1, 3)).reshape(num_tile_rows, num_tile_cols, -1)
+
+def blockshaped_color(arr, num_tile_rows, num_tile_cols):
+    h, w = arr.shape
+    return arr.reshape(num_tile_rows, h // num_tile_rows, num_tile_cols, -1, 3).transpose((0, 2, 1, 3)).reshape(num_tile_rows, num_tile_cols, -1, 3)
 
 
 if __name__ == "__main__":
@@ -23,9 +27,9 @@ if __name__ == "__main__":
 	grayscale = rgb2gray(original)
 	print(grayscale.shape)
 
-	block_height = 102
-	block_width = 173
-	blocks = blockshaped(grayscale, block_height, block_width)
+	num_tile_rows = 102
+	num_tile_cols = 173
+	blocks = blockshaped(grayscale, num_tile_rows, num_tile_cols)
 
 	base_name = ".".join(sys.argv[1].split('.')[:-1])
 
