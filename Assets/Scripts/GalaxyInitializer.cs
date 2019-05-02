@@ -5,7 +5,15 @@ using UnityEngine;
 
 public class GalaxyInitializer : MonoBehaviour
 {
-    public string galaxyFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
+    public string galaxyPixFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
+
+    public string galaxyHMeanFile = "Assets/Galaxy Files/galaxy_h_mean_array.txt";
+    public string galaxySMeanFile = "Assets/Galaxy Files/galaxy_s_mean_array.txt";
+    public string galaxyVMeanFile = "Assets/Galaxy Files/galaxy_v_mean_array.txt";
+
+    public string galaxyHStdFile = "Assets/Galaxy Files/galaxy_h_std_array.txt";
+    public string galaxySStdFile = "Assets/Galaxy Files/galaxy_s_std_array.txt";
+    public string galaxyVStdFile = "Assets/Galaxy Files/galaxy_v_std_array.txt";
 
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
@@ -23,7 +31,7 @@ public class GalaxyInitializer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ReadDistributionFile(galaxyFile);
+        ReadDistributionFile(galaxyPixFile);
 
         cpu_particles_manager = GetComponent<CPUParticleManager>();
         if (cpu_particles_manager == null)
@@ -118,7 +126,7 @@ public class GalaxyInitializer : MonoBehaviour
 
         if (densities.Count == 0)
         {
-            Debug.LogWarning("Empty file: " + galaxyFile);
+            Debug.LogWarning("Empty file: " + file_path);
             return;
         }
 
