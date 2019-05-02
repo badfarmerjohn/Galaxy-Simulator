@@ -44,12 +44,12 @@ public class GalaxyInitializer : MonoBehaviour
 
     PhysicalParticle[] GenerateCpuParticles(int num_particles)
     {
-        Debug.Log("Generating: " + num_particles);
+        Debug.Log("Generating CPU Particles: " + num_particles);
         PhysicalParticle[] cpu_particles = new PhysicalParticle[num_particles];
 
-        Vector3 center_offset = new Vector3(-cumulative_row_densities.Length / 2, 0, -marginal_cumulative_col.GetLength(1) / 2);
-        float tileRadius2 = center_offset.sqrMagnitude;
-        float gaussFactor = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadius2);
+        Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
+        float tileRadius2 = (0.15f * center_offset).sqrMagnitude;
+        float gaussFactor = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadius2) * 10000 * cellSize;
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -75,10 +75,10 @@ public class GalaxyInitializer : MonoBehaviour
             col -= 1;
 
             Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
-            float y_range = Mathf.Exp(-(center_offset - unit_position).sqrMagnitude / tileRadius2) * gaussFactor;
+            float y_range = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadius2) * gaussFactor;
 
             PhysicalParticle p = new PhysicalParticle();
-            p.position = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) + center_offset);
+            p.position = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) - center_offset);
             p.color = Color.white;
             p.mass = 1;
             p.size = 0.01f;

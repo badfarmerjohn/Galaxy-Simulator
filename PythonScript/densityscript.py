@@ -31,14 +31,11 @@ if __name__ == "__main__":
 
 	f = open(base_name + "_pix_array.txt", "w")
 
-	im = np.zeros((block_height, block_width))
+	blocks = np.mean(blocks, axis=2, keepdims=False)
 
 	for i in range(blocks.shape[0]):
-		for j in range(blocks.shape[1]):
-			avg = np.mean(blocks[i, j])
-			im[i, j] = avg
-			f.write(str(avg) + " ")
+		f.write(" ".join(map(str, blocks[i].tolist())))
 		f.write("\n")
 
-	plt.imshow(im, cmap="gray")
+	plt.imshow(blocks, cmap="gray")
 	plt.savefig(base_name + "_pix_image.png")
