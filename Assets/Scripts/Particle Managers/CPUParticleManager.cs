@@ -74,10 +74,9 @@ public class CPUParticleManager : MonoBehaviour
         EnsureSize(num_particles + length);
         for (int i = 0, j = start_ind, k = num_particles; i < length; i++, j++, k++)
         {
-            Debug.Log(particles[i].position);
             _particles[k].position = particles[j].position;
-            _particles[k].startColor = Color.red;
-            _particles[k].startSize = 0.5f;
+            _particles[k].startColor = particles[j].color;
+            _particles[k].startSize = particles[j].size;
         }
         OnParticlesChanged(num_particles + length);
     }

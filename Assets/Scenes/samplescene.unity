@@ -480,7 +480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   galaxyFile: Assets/Galaxy Files/galaxy_pix_array.txt
-  numCpuParticles: 100
+  numCpuParticles: 10000
   numGpuParticles: 0
   cellSize: 0.05
 --- !u!114 &797600213

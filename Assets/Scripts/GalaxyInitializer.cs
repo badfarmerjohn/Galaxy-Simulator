@@ -18,6 +18,8 @@ public class GalaxyInitializer : MonoBehaviour
     CPUParticleManager cpu_particles_manager;
     GPUParticleManager gpu_particles_manager;
 
+    bool added = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,14 +30,16 @@ public class GalaxyInitializer : MonoBehaviour
         {
             cpu_particles_manager = gameObject.AddComponent<CPUParticleManager>();
         }
-
-        cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (!added)
+        {
+            cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
+            added = true;
+        }
     }
 
     PhysicalParticle[] GenerateCpuParticles(int num_particles)
@@ -67,9 +71,9 @@ public class GalaxyInitializer : MonoBehaviour
 
             PhysicalParticle p = new PhysicalParticle();
             p.position = cellSize * (new Vector3(row + Random.value, 0, col + Random.value));
-            p.color = Color.red;
+            p.color = Color.white;
             p.mass = 1;
-            p.size = 0.1f;
+            p.size = 0.01f;
             p.velocity = Vector3.zero;
             cpu_particles[i] = p;
         }
