@@ -7,6 +7,14 @@ public class GalaxyInitializer : MonoBehaviour
 {
     public string galaxyCPUFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
 
+    public string galaxyHMeanFile = "Assets/Galaxy Files/galaxy_h_mean_array.txt";
+    public string galaxySMeanFile = "Assets/Galaxy Files/galaxy_s_mean_array.txt";
+    public string galaxyVMeanFile = "Assets/Galaxy Files/galaxy_v_mean_array.txt";
+
+    public string galaxyHStdFile = "Assets/Galaxy Files/galaxy_h_std_array.txt";
+    public string galaxySStdFile = "Assets/Galaxy Files/galaxy_s_std_array.txt";
+    public string galaxyVStdFile = "Assets/Galaxy Files/galaxy_v_std_array.txt";
+
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
 
