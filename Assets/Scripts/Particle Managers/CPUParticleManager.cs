@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEditor;
 
 public class CPUParticleManager : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class CPUParticleManager : MonoBehaviour
     ParticleSystem ps;
     ParticleSystemRenderer ps_renderer;
     Material ps_material;
+    static Texture2D m_Particle;
 
     ParticleSystem.Particle[] _particles = null;
     int num_particles = 0;
@@ -33,10 +35,12 @@ public class CPUParticleManager : MonoBehaviour
             ps = gameObject.AddComponent<ParticleSystem>();
         }
         ps_renderer = GetComponent<ParticleSystemRenderer>();
+        m_Particle = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/Star Texture - White.png", typeof(Texture2D));
         InitializeParticleSystem(ps, ps_renderer, initialParticleCount);
         ps.SetParticles(_particles, num_particles, 0);
 
         last_update_time = Time.time;
+
     }
 
     // Update is called once per frame
@@ -141,7 +145,7 @@ public class CPUParticleManager : MonoBehaviour
      * https://github.com/jeshlee121/ISAACS-RadiationVisualization.git
      * *************/
 
-    protected static void PrepareMaterial(Material particleMaterial)
+    protected static void PrepareMaterial(Material particleMaterial, Texture2D m_Particle)
     {
         // Make it transparent
         particleMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
@@ -151,6 +155,8 @@ public class CPUParticleManager : MonoBehaviour
         particleMaterial.EnableKeyword("_ALPHABLEND_ON");
         particleMaterial.EnableKeyword("_ALPHAPREMULTIPLY_ON");
         particleMaterial.renderQueue = 3000;
+        particleMaterial.SetTexture("_MainTex", m_Particle);
+        particleMaterial.SetColor("_TintColor", Color.white);
     }
 
     protected void InitializeParticleSystem(ParticleSystem ps, ParticleSystemRenderer renderer, int max_particles)
@@ -177,7 +183,7 @@ public class CPUParticleManager : MonoBehaviour
         ps_material = new Material(Shader.Find(shader));
         renderer.material = ps_material;
 
-        PrepareMaterial(ps_material);
+        PrepareMaterial(ps_material, m_Particle);
 
         SetDefaultColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
         SetDefaultEmission(new Color(0.5f, 0.5f, 0.5f, 0.8f));
