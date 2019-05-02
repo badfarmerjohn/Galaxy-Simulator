@@ -2,30 +2,41 @@ from skimage import io
 from skimage.color import rgb2gray
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
-def blockshaped(arr, nrows, ncols):
+# def blockshaped(arr, nrows, ncols):
+#     h, w = arr.shape
+#     return arr.reshape(h // nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1, nrows, ncols)
+
+def blockshaped(arr, block_height, block_width):
     h, w = arr.shape
-    return (arr.reshape(h // nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1, nrows, ncols))
+    return arr.reshape(block_height, h // block_height, block_width, -1).transpose((0, 2, 1, 3)).reshape(block_height, block_width, -1)
 
-original = io.imread('galaxy.jpg')
-grayscale = rgb2gray(original)
-print(grayscale.shape)
-num_rows = 102
-num_cols = 173
-num_pixel_rows = grayscale.shape[0] // num_rows
-num_pixel_cols = grayscale.shape[1] // num_cols
-blocks = blockshaped(grayscale, num_pixel_rows, num_pixel_cols)
-f = open("pixel_array.txt", "w")
-curr_col = 0
-im = np.zeros((num_rows * num_cols,))
-for i in range(blocks.shape[0]):
-	avg = np.mean(blocks[i])
-	im[i] = avg
-	f.write(str(avg) + " ")
-	curr_col += 1
-	if curr_col >= num_cols:
+
+if __name__ == "__main__":
+	if len(sys.argv) < 2:
+		print("Usage: python {} [image_file]".format(sys.argv[0]))
+		exit(0)
+	im_file_name = sys.argv[1]
+
+	original = io.imread(im_file_name)
+	grayscale = rgb2gray(original)
+	print(grayscale.shape)
+
+	block_height = 102
+	block_width = 173
+	blocks = blockshaped(grayscale, block_height, block_width)
+
+	f = open("pixel_array.txt", "w")
+	
+	im = np.zeros((block_height, block_width))
+
+	for i in range(blocks.shape[0]):
+		for j in range(blocks.shape[1]):
+			avg = np.mean(blocks[i, j])
+			im[i, j] = avg
+			f.write(str(avg) + " ")
 		f.write("\n")
-		curr_col = 0
 
-plt.imshow(im.reshape(num_rows, num_cols), cmap="gray")
-plt.show()
+	plt.imshow(im, cmap="gray")
+	plt.show()
