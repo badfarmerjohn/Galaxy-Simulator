@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GalaxyInitializer : MonoBehaviour
 {
-    public string galaxyFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
+    public string galaxyCPUFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
 
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
@@ -23,12 +23,18 @@ public class GalaxyInitializer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ReadDistributionFile(galaxyFile);
+        ReadDistributionFile(galaxyCPUFile);
 
         cpu_particles_manager = GetComponent<CPUParticleManager>();
         if (cpu_particles_manager == null)
         {
             cpu_particles_manager = gameObject.AddComponent<CPUParticleManager>();
+        }
+
+        gpu_particles_manager = GetComponent<GPUParticleManager>();
+        if (gpu_particles_manager == null)
+        {
+            gpu_particles_manager = gameObject.AddComponent<GPUParticleManager>();
         }
     }
 
@@ -39,6 +45,12 @@ public class GalaxyInitializer : MonoBehaviour
         {
             cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
             added = true;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            gpu_particles_manager.Clear();
+            GenerateGpuParticles(numGpuParticles);
         }
     }
 
@@ -88,9 +100,50 @@ public class GalaxyInitializer : MonoBehaviour
         return cpu_particles;
     }
 
-    PhysicalParticle[] GenerateGpuParticles()
+    void GenerateGpuParticles(int num_particles)
     {
-        return null;
+        Debug.Log("Generating GPU Particles: " + num_particles);
+
+        Vector3[] positions = new Vector3[num_particles];
+        //Vector3[] scales = new Vector3[num_particles];
+        //Color[] colors = new Color[num_particles];
+
+        Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
+        float tileRadius2 = (0.15f * center_offset).sqrMagnitude;
+        float gaussFactor = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadius2) * 10000 * cellSize;
+
+        for (int i = 0; i < num_particles; i++)
+        {
+            float rand1 = Random.value, rand2 = Random.value;
+            int row;
+            for (row = 1; row < cumulative_row_densities.Length; row++)
+            {
+                if (cumulative_row_densities[row] > rand1)
+                {
+                    break;
+                }
+            }
+            row -= 1;
+
+            int col, width = marginal_cumulative_col.GetLength(1);
+            for (col = 1; col < width; col++)
+            {
+                if (marginal_cumulative_col[row, col] > rand2)
+                {
+                    break;
+                }
+            }
+            col -= 1;
+
+            Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
+            float y_range = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadius2) * gaussFactor;
+            
+            positions[i] = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) - center_offset);
+            //colors[i] = Color.white;
+            //scales[i] = 0.01f * Vector3.one;
+        }
+
+        gpu_particles_manager.AddPoints(positions);
     }
 
     void ReadDistributionFile(string file_path)
@@ -118,7 +171,7 @@ public class GalaxyInitializer : MonoBehaviour
 
         if (densities.Count == 0)
         {
-            Debug.LogWarning("Empty file: " + galaxyFile);
+            Debug.LogWarning("Empty file: " + galaxyCPUFile);
             return;
         }
 

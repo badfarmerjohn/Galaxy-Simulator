@@ -32,10 +32,10 @@ public class GPUParticleTest : MonoBehaviour
                 colors[i] = Random.ColorHSV();
             }
             Vector3[] scales = new Vector3[amount];
-            Vector3 baseSize = 0.05f * Vector3.one;
+            Vector3 baseSize = 0.01f * Vector3.one;
             for (int i = 0; i < particles.Length; i++)
             {
-                scales[i] = 0.1f * (new Vector3(Random.value, Random.value, Random.value)) + baseSize;
+                scales[i] = 0.05f * (new Vector3(Random.value, Random.value, Random.value)) + baseSize;
             }
             manager.AddPoints(particles, scales: scales, colors: colors);
         }

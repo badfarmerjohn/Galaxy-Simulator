@@ -458,10 +458,11 @@ GameObject:
   m_Component:
   - component: {fileID: 797600214}
   - component: {fileID: 797600213}
+  - component: {fileID: 797600216}
   - component: {fileID: 797600212}
   - component: {fileID: 797600215}
   m_Layer: 0
-  m_Name: CPU Particles
+  m_Name: Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -479,9 +480,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed48266ce124cf9449967fbf67430e7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  galaxyFile: Assets/Galaxy Files/galaxy_pix_array.txt
-  numCpuParticles: 100000
-  numGpuParticles: 0
+  galaxyCPUFile: Assets/Galaxy Files/galaxy_pix_array.txt
+  numCpuParticles: 0
+  numGpuParticles: 1000
   cellSize: 0.05
 --- !u!114 &797600213
 MonoBehaviour:
@@ -521,6 +522,18 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8fd7eb852afacf49be057965163e5fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &797600216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 797600211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 132d0dc3da86dfb4c976c61ef72a4808, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &954474956
