@@ -10,17 +10,23 @@ public class CPUParticleManager : MonoBehaviour
     ParticleSystemRenderer ps_renderer;
     Material ps_material;
 
-    ParticleSystem.Particle[] _particles;
+    ParticleSystem.Particle[] _particles = null;
     int num_particles = 0;
 
     bool needs_update = false;
     int new_particle_count = 0;
 
+    float last_update_time;
+    float update_interval = 5;
+
 
     // Start is called before the first frame update
     void Start()
     {
-        _particles = new ParticleSystem.Particle[initialParticleCount];
+        if (_particles != null)
+        {
+            _particles = new ParticleSystem.Particle[initialParticleCount];
+        }
         ps = GetComponent<ParticleSystem>();
         if (ps == null)
         {
@@ -29,16 +35,20 @@ public class CPUParticleManager : MonoBehaviour
         ps_renderer = GetComponent<ParticleSystemRenderer>();
         InitializeParticleSystem(ps, ps_renderer, initialParticleCount);
         ps.SetParticles(_particles, num_particles, 0);
+
+        last_update_time = Time.time;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (needs_update)
+        if (_particles != null && (needs_update || Time.time - last_update_time > update_interval))
         {
             num_particles = Mathf.Clamp(new_particle_count, 0, _particles.Length);
             ps.SetParticles(_particles, num_particles, 0);
+
             needs_update = false;
+            last_update_time = Time.time;
         }
     }
 
@@ -64,9 +74,10 @@ public class CPUParticleManager : MonoBehaviour
         EnsureSize(num_particles + length);
         for (int i = 0, j = start_ind, k = num_particles; i < length; i++, j++, k++)
         {
+            Debug.Log(particles[i].position);
             _particles[k].position = particles[j].position;
-            _particles[k].startColor = particles[j].color;
-            _particles[k].startSize = particles[j].size;
+            _particles[k].startColor = Color.red;
+            _particles[k].startSize = 0.5f;
         }
         OnParticlesChanged(num_particles + length);
     }
@@ -90,6 +101,11 @@ public class CPUParticleManager : MonoBehaviour
 
     void EnsureSize(int new_size)
     {
+        if (_particles == null)
+        {
+            _particles = new ParticleSystem.Particle[new_size];
+            return;
+        }
         ParticleSystem.Particle[] new_container = _particles;
         while (num_particles >= new_container.Length)
         {
@@ -114,7 +130,6 @@ public class CPUParticleManager : MonoBehaviour
     {
         ps_material.SetColor("_Color", color);
         ps_renderer.material = ps_material;
-        Debug.Log("Setting color");
     }
 
     public void SetDefaultEmission(Color color)
@@ -150,6 +165,7 @@ public class CPUParticleManager : MonoBehaviour
         renderer.sortMode = ParticleSystemSortMode.Distance;
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         renderer.receiveShadows = false;
+
         renderer.renderMode = ParticleSystemRenderMode.Mesh;
 
         GameObject gameObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);

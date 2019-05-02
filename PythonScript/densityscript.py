@@ -27,8 +27,10 @@ if __name__ == "__main__":
 	block_width = 173
 	blocks = blockshaped(grayscale, block_height, block_width)
 
-	f = open("pixel_array.txt", "w")
-	
+	base_name = ".".join(sys.argv[1].split('.')[:-1])
+
+	f = open(base_name + "_pix_array.txt", "w")
+
 	im = np.zeros((block_height, block_width))
 
 	for i in range(blocks.shape[0]):
@@ -39,4 +41,4 @@ if __name__ == "__main__":
 		f.write("\n")
 
 	plt.imshow(im, cmap="gray")
-	plt.show()
+	plt.savefig(base_name + "_pix_image.png")

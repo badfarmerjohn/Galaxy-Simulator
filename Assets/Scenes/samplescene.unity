@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 1
+  m_AmbientIntensity: 0
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2035111234}
-  m_IndirectSpecularColor: {r: 0.3233236, g: 0.4691064, b: 0.77551025, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 0}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -459,13 +459,14 @@ GameObject:
   - component: {fileID: 797600214}
   - component: {fileID: 797600213}
   - component: {fileID: 797600212}
+  - component: {fileID: 797600215}
   m_Layer: 0
   m_Name: CPU Particles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &797600212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,9 +476,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 797600211}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8fd7eb852afacf49be057965163e5fe, type: 3}
+  m_Script: {fileID: 11500000, guid: ed48266ce124cf9449967fbf67430e7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  galaxyFile: Assets/Galaxy Files/galaxy_pix_array.txt
+  numCpuParticles: 100
+  numGpuParticles: 0
+  cellSize: 0.05
 --- !u!114 &797600213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,7 +495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4d573c635611684c94a4eecfcc40391, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialParticleCount: 20000
+  initialParticleCount: 10000
   shader: Legacy Shaders/Particles/Alpha Blended
 --- !u!4 &797600214
 Transform:
@@ -506,6 +511,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &797600215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 797600211}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8fd7eb852afacf49be057965163e5fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &954474956
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,7 +539,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &954474957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -800,7 +817,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1197707949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1341,7 +1358,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2011204167
 MonoBehaviour:
   m_ObjectHideFlags: 0
