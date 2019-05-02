@@ -156,6 +156,7 @@ public class CPUParticleManager : MonoBehaviour
         particleMaterial.EnableKeyword("_ALPHAPREMULTIPLY_ON");
         particleMaterial.renderQueue = 3000;
         particleMaterial.SetTexture("_MainTex", m_Particle);
+        particleMaterial.SetColor("_TintColor", Color.white);
     }
 
     protected void InitializeParticleSystem(ParticleSystem ps, ParticleSystemRenderer renderer, int max_particles)
