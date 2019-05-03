@@ -79,11 +79,16 @@ public class GalaxyInitializer : MonoBehaviour
         Debug.Log("Generating CPU Particles: " + num_particles);
         PhysicalParticle[] cpu_particles = new PhysicalParticle[num_particles];
 
+
         Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
-        float tileRadiusSqr1 = (center_offset * 0.2f).sqrMagnitude;
+        float tileRadiusBase = center_offset.magnitude;
+        float tileRadiusSqr1 = (center_offset * 0.25f).sqrMagnitude;
         float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
-        float gaussFactor1 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr1) * 5000 * cellSize;
-        float gaussFactor2 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr2) * 10000 * cellSize;
+
+        cellSize = 3.0f / tileRadiusBase;
+        
+        float fudgeFactor1 = tileRadiusBase / 15;
+        float fudgeFactor2 = tileRadiusBase / 75;
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -111,8 +116,8 @@ public class GalaxyInitializer : MonoBehaviour
             PhysicalParticle p = new PhysicalParticle();
 
             Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
-            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * gaussFactor1;
-            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * gaussFactor2;
+            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * fudgeFactor1;
+            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * fudgeFactor2;
             p.position = cellSize * (new Vector3(unit_position.x, sampleGaussian(0, Mathf.Max(y_range_1, y_range_2)), unit_position.z) - center_offset);
 
             float hue_mean = h_mean[row, col];
@@ -129,7 +134,7 @@ public class GalaxyInitializer : MonoBehaviour
             //p.color = Color.white;
             p.color = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
             p.mass = 1;
-            p.size = 0.01f;
+            p.size = Mathf.Pow(Random.value * 0.9f + 0.1f, 5) * 0.01f;
             p.velocity = Vector3.zero;
             cpu_particles[i] = p;
         }
@@ -145,10 +150,14 @@ public class GalaxyInitializer : MonoBehaviour
         Color[] colors = new Color[num_particles];
 
         Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
-        float tileRadiusSqr1 = (center_offset * 0.2f).sqrMagnitude;
+        float tileRadiusBase = center_offset.magnitude;
+        float tileRadiusSqr1 = (center_offset * 0.25f).sqrMagnitude;
         float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
-        float gaussFactor1 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr1) * 5000 * cellSize;
-        float gaussFactor2 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr2) * 10000 * cellSize;
+
+        cellSize = 3.0f / tileRadiusBase;
+
+        float fudgeFactor1 = tileRadiusBase / 15;
+        float fudgeFactor2 = tileRadiusBase / 75;
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -174,8 +183,8 @@ public class GalaxyInitializer : MonoBehaviour
             col -= 1;
 
             Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
-            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * gaussFactor1;
-            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * gaussFactor2;
+            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * fudgeFactor1;
+            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * fudgeFactor2;
             positions[i] = cellSize * (new Vector3(unit_position.x, sampleGaussian(0, Mathf.Max(y_range_1, y_range_2)), unit_position.z) - center_offset);
 
             float hue_mean = h_mean[row, col];

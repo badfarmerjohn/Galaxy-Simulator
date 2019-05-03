@@ -482,7 +482,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   galaxyFolder: Assets/Galaxy Files/galaxy - edited
   numCpuParticles: 100000
-  numGpuParticles: 10000000
+  numGpuParticles: 1000000
   cellSize: 0.05
 --- !u!114 &797600213
 MonoBehaviour:

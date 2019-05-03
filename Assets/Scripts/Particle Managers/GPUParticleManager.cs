@@ -79,7 +79,7 @@ public class GPUParticleManager : MonoBehaviour
         _default_point_colors = new Texture2D(SystemInfo.maxTextureSize, 1, TextureFormat.RGBAFloat, false);
         default_point_colors = _default_point_colors.GetRawTextureData<Color>();
 
-        default_size = 0.005f;
+        default_size = 0.01f;
         default_color = new Color(1, 1, 1, 1);
 
         last_push_time = Time.time - wait_interval;
