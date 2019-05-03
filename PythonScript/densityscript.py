@@ -44,12 +44,13 @@ if __name__ == "__main__":
     original = io.imread(im_file_name)
     grayscale = rgb2gray(original)
 
-    num_tile_rows = 102
-    num_tile_cols = 173
-    #num_tile_rows = 714
-    #num_tile_cols = 865
-    blocks = blockshaped(grayscale, num_tile_rows, num_tile_cols)
+    # num_tile_rows = 102
+    # num_tile_cols = 173
 
+    num_tile_rows = 714
+    num_tile_cols = 865
+
+    blocks = blockshaped(grayscale, num_tile_rows, num_tile_cols)
     
     f_pix = open(new_folder_path + "pix_array.txt", "w")
     mean_blocks = np.mean(blocks, axis=2, keepdims=False)
