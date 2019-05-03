@@ -9,7 +9,7 @@ public class PhysicalParticleSimulator
     uint num_particles;
     PhysicalParticle[] physical_particles;
 
-    void PhysicsParticleSimulator(PhysicalParticle[] particles = null, float gravitational_constant = 1.0f)
+    public PhysicalParticleSimulator(PhysicalParticle[] particles = null, float gravitational_constant = 6.67408e-11f)
     {
         physical_particles = particles;
         GRAVITATIONAL_CONSTANT = gravitational_constant;

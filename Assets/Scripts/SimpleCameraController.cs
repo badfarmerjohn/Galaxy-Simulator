@@ -53,6 +53,11 @@ namespace UnityTemplateProjects
         CameraState m_TargetCameraState = new CameraState();
         CameraState m_InterpolatingCameraState = new CameraState();
 
+        public GameObject trackObject = null;
+
+        float targetRadius = 0f;
+        float interpRadius = 0f;
+
         [Header("Movement Settings")]
         [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
         public float boost = 3.5f;
@@ -74,34 +79,69 @@ namespace UnityTemplateProjects
         {
             m_TargetCameraState.SetFromTransform(transform);
             m_InterpolatingCameraState.SetFromTransform(transform);
+
+            if (trackObject != null)
+            {
+                targetRadius = (trackObject.transform.position - transform.position).magnitude;
+                interpRadius = targetRadius;
+            }
         }
 
         Vector3 GetInputTranslationDirection()
         {
             Vector3 direction = new Vector3();
-            if (Input.GetKey(KeyCode.W))
+            if (trackObject == null)
             {
-                direction += Vector3.forward;
-            }
-            if (Input.GetKey(KeyCode.S))
+                if (Input.GetKey(KeyCode.W))
+                {
+                    direction += Vector3.forward;
+                }
+                if (Input.GetKey(KeyCode.S))
+                {
+                    direction += Vector3.back;
+                }
+                if (Input.GetKey(KeyCode.A))
+                {
+                    direction += Vector3.left;
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    direction += Vector3.right;
+                }
+                if (Input.GetKey(KeyCode.Q))
+                {
+                    direction += Vector3.down;
+                }
+                if (Input.GetKey(KeyCode.E))
+                {
+                    direction += Vector3.up;
+                }
+            } else
             {
-                direction += Vector3.back;
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                direction += Vector3.left;
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                direction += Vector3.right;
-            }
-            if (Input.GetKey(KeyCode.Q))
-            {
-                direction += Vector3.down;
-            }
-            if (Input.GetKey(KeyCode.E))
-            {
-                direction += Vector3.up;
+                if (Input.GetKey(KeyCode.W))
+                {
+                    targetRadius -= Time.deltaTime * targetRadius * 0.5f;
+                }
+                if (Input.GetKey(KeyCode.S))
+                {
+                    targetRadius += Time.deltaTime * boost * 0.5f;
+                }
+                if (Input.GetKey(KeyCode.A))
+                {
+                    direction -= transform.right;
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    direction += transform.right;
+                }
+                if (Input.GetKey(KeyCode.Q))
+                {
+                    direction += Vector3.down;
+                }
+                if (Input.GetKey(KeyCode.E))
+                {
+                    direction += Vector3.up;
+                }
             }
             return direction;
         }
@@ -151,7 +191,7 @@ namespace UnityTemplateProjects
             }
             
             // Modify movement by a boost factor (defined in Inspector and modified in play mode through the mouse scroll wheel)
-            boost += Input.mouseScrollDelta.y * 0.2f;
+            //boost += Input.mouseScrollDelta.y * 0.2f;
             translation *= Mathf.Pow(2.0f, boost);
 
             m_TargetCameraState.Translate(translation);
@@ -163,6 +203,15 @@ namespace UnityTemplateProjects
             m_InterpolatingCameraState.LerpTowards(m_TargetCameraState, positionLerpPct, rotationLerpPct);
 
             m_InterpolatingCameraState.UpdateTransform(transform);
+
+            interpRadius = Mathf.Lerp(interpRadius, targetRadius, positionLerpPct);
+
+            if (trackObject != null)
+            {
+                transform.LookAt(trackObject.transform);
+                Vector3 diff = trackObject.transform.position - transform.position;
+                transform.position += (diff.magnitude - interpRadius) * diff.normalized;
+            }
         }
     }
 

@@ -37,6 +37,9 @@ public class GalaxyInitializer : MonoBehaviour
 
     bool added = false;
 
+    PhysicalParticleSimulator simulator;
+    PhysicalParticle[] cpu_particles = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,7 +65,10 @@ public class GalaxyInitializer : MonoBehaviour
     {
         if (!added)
         {
-            cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
+            cpu_particles = GenerateCpuParticles(numCpuParticles);
+            cpu_particles_manager.AddParticles(cpu_particles, 0, numCpuParticles);
+            simulator = new PhysicalParticleSimulator(particles: cpu_particles);
+
             GenerateGpuParticles(numGpuParticles);
             added = true;
         }
@@ -73,6 +79,15 @@ public class GalaxyInitializer : MonoBehaviour
             GenerateGpuParticles(numGpuParticles);
         }
     }
+
+    //void FixedUpdate()
+    //{
+    //    if (cpu_particles != null)
+    //    {
+    //        simulator.PerformTimestep(Time.fixedDeltaTime);
+    //        cpu_particles_manager.UpdateParticlePositions(cpu_particles);
+    //    }
+    //}
 
     PhysicalParticle[] GenerateCpuParticles(int num_particles)
     {
