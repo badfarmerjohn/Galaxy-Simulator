@@ -2,38 +2,61 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PhysicalParticleSimulator : MonoBehaviour
+public class PhysicalParticleSimulator
 {
-  public const float GRAVITATIONAL_CONSTANT = 1.0f;
-  public PhysicalParticle[] physical_particles;
+    float GRAVITATIONAL_CONSTANT = 6.67408e-11f;
 
-  void Update()
-  {
-    float dt = Time.deltaTime;
-    for (uint i = 0; i < physical_particles.Length; ++i)
+    PhysicalParticle[] physical_particles;
+
+    void PhysicsParticleSimulator(PhysicalParticle[] particles = null, float gravitational_constant = 1.0f)
     {
-      Vector3 force_on_particle_i = NaiveForceOnParticle(i);
-      ApplyForce(i, force_on_particle_i, dt);
+        physical_particles = particles;
+        GRAVITATIONAL_CONSTANT = gravitational_constant;
     }
-  }
 
-  void ApplyForce(uint index, Vector3 total_force, float dt)
-  {
-    physical_particles[index].position += physical_particles[index].velocity * dt;
-    physical_particles[index].velocity += total_force / physical_particles[index].mass * dt;
-  }
-
-  Vector3 NaiveForceOnParticle(uint index)
-  {
-    Vector3 force = new Vector3();
-    PhysicalParticle p_i = physical_particles[index];
-    for (uint j = 0; j < index; ++j)
+    public void SetParticles (PhysicalParticle[] particles)
     {
-      Vector3 position_difference = p_i.position - physical_particles[j].position;
-      float pd_cubed = position_difference.magnitude * position_difference.magnitude * position_difference.magnitude;
-      force += GRAVITATIONAL_CONSTANT * physical_particles[j].mass * (position_difference / pd_cubed);
+        physical_particles = particles;
     }
-    return force;
-  }
+
+    public void PerformTimestep(float deltaT)
+    {
+        if (physical_particles == null)
+        {
+            return;
+        }
+        for (uint i = 0; i < physical_particles.Length; ++i)
+        {
+            Vector3 force_on_particle_i = NaiveForceOnParticle(i);
+            ApplyForce(i, force_on_particle_i, deltaT);
+            physical_particles[i].position += physical_particles[i].velocity * deltaT;
+
+            Debug.Log(physical_particles[i].velocity);
+        }
+    }
+
+    void ApplyForce(uint index, Vector3 total_force, float dt)
+    {
+        physical_particles[index].position += physical_particles[index].velocity * dt;
+        physical_particles[index].velocity += total_force / physical_particles[index].mass * dt;
+    }
+
+    Vector3 NaiveForceOnParticle(uint index)
+    {
+        Vector3 force = new Vector3();
+        PhysicalParticle p_i = physical_particles[index];
+        for (uint j = 0; j < index; ++j)
+        {
+            if (j == index)
+            {
+                continue;
+            }
+            Vector3 position_difference = physical_particles[j].position - p_i.position;
+            float distance = position_difference.magnitude;
+            float pd_cubed = distance * distance * distance;
+            force += GRAVITATIONAL_CONSTANT * p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
+        }
+        return force;
+    }
 
 }
