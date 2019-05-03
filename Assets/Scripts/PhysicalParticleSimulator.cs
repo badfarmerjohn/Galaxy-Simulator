@@ -98,6 +98,10 @@ public class PhysicalParticleSimulator
             }
             return;
         }
+        if (center_of_mass == null)
+        {
+            ComputeCenterOfMass();
+        }
         for (uint i = 0; i < num_particles; ++i)
         {
             Vector3 dist_vector = center_of_mass - physical_particles[i].position;
