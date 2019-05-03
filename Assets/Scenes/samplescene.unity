@@ -480,7 +480,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed48266ce124cf9449967fbf67430e7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  galaxyCPUFile: Assets/Galaxy Files/galaxy - edited_pix_array.txt
+  galaxyCPUFile: Assets/Galaxy Files/galaxy_pix_array.txt
   galaxyHMeanFile: Assets/Galaxy Files/galaxy_h_mean_array.txt
   galaxySMeanFile: Assets/Galaxy Files/galaxy_s_mean_array.txt
   galaxyVMeanFile: Assets/Galaxy Files/galaxy_v_mean_array.txt
