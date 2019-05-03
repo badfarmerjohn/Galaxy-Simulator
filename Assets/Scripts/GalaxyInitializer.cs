@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -7,14 +7,14 @@ public class GalaxyInitializer : MonoBehaviour
 {
     public string galaxyFolder = "Assets/Galaxy Files/galaxy";
 
-    string galaxyCPUFile = "Assets/Galaxy Files/galaxy_pix_array.txt";
-    string galaxyHMeanFile = "Assets/Galaxy Files/galaxy_h_mean_array.txt";
-    string galaxySMeanFile = "Assets/Galaxy Files/galaxy_s_mean_array.txt";
-    string galaxyVMeanFile = "Assets/Galaxy Files/galaxy_v_mean_array.txt";
+    string galaxyCPUFile;
+    string galaxyHMeanFile;
+    string galaxySMeanFile;
+    string galaxyVMeanFile;
 
-    string galaxyHStdFile = "Assets/Galaxy Files/galaxy_h_std_array.txt";
-    string galaxySStdFile = "Assets/Galaxy Files/galaxy_s_std_array.txt";
-    string galaxyVStdFile = "Assets/Galaxy Files/galaxy_v_std_array.txt";
+    string galaxyHStdFile;
+    string galaxySStdFile;
+    string galaxyVStdFile;
 
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
@@ -40,6 +40,15 @@ public class GalaxyInitializer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        galaxyCPUFile = galaxyFolder + "/pix_array.txt";
+        galaxyHMeanFile = galaxyFolder + "/h_mean_array.txt";
+        galaxySMeanFile = galaxyFolder + "/s_mean_array.txt";
+        galaxyVMeanFile = galaxyFolder + "/v_mean_array.txt";
+
+        galaxyHStdFile = galaxyFolder + "/h_std_array.txt";
+        galaxySStdFile = galaxyFolder + "/s_std_array.txt";
+        galaxyVStdFile = galaxyFolder + "/v_std_array.txt";
+
         ReadDistributionFile(galaxyCPUFile);
         SetUpHSVStructures();
 
@@ -114,7 +123,7 @@ public class GalaxyInitializer : MonoBehaviour
             float sat_mean = s_mean[row, col];
             float sat_std = s_std[row, col];
             float sat_sample = sampleGaussian(sat_mean, sat_std);
-
+            
             float value_mean = v_mean[row, col];
             float value_std = v_std[row, col];
             float value_sample = sampleGaussian(value_mean, value_std);
@@ -165,7 +174,7 @@ public class GalaxyInitializer : MonoBehaviour
                 }
             }
             col -= 1;
-            
+
             float hue_mean = h_mean[row, col];
             float hue_std = h_std[row, col];
             float hue_sample = sampleGaussian(hue_mean, hue_std);
