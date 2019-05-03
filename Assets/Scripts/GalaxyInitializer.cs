@@ -7,14 +7,14 @@ public class GalaxyInitializer : MonoBehaviour
 {
     public string galaxyFolder = "Assets/Galaxy Files/galaxy";
 
-    string galaxyCPUFile;
-    string galaxyHMeanFile;
-    string galaxySMeanFile;
-    string galaxyVMeanFile;
+    string galaxyCPUFileSuffix = "/pix_array.txt";
+    string galaxyHMeanFileSuffix = "/h_mean_array.txt";
+    string galaxySMeanFileSuffix = "/s_mean_array.txt";
+    string galaxyVMeanFileSuffix = "/v_mean_array.txt";
 
-    string galaxyHStdFile;
-    string galaxySStdFile;
-    string galaxyVStdFile;
+    string galaxyHStdFileSuffix = "/h_std_array.txt";
+    string galaxySStdFileSuffix = "/s_std_array.txt";
+    string galaxyVStdFileSuffix = "/v_std_array.txt";
 
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
@@ -40,16 +40,8 @@ public class GalaxyInitializer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        galaxyCPUFile = galaxyFolder + "/pix_array.txt";
-        galaxyHMeanFile = galaxyFolder + "/h_mean_array.txt";
-        galaxySMeanFile = galaxyFolder + "/s_mean_array.txt";
-        galaxyVMeanFile = galaxyFolder + "/v_mean_array.txt";
 
-        galaxyHStdFile = galaxyFolder + "/h_std_array.txt";
-        galaxySStdFile = galaxyFolder + "/s_std_array.txt";
-        galaxyVStdFile = galaxyFolder + "/v_std_array.txt";
-
-        ReadDistributionFile(galaxyCPUFile);
+        ReadDistributionFile(galaxyFolder + galaxyCPUFileSuffix);
         SetUpHSVStructures();
 
         cpu_particles_manager = GetComponent<CPUParticleManager>();
@@ -71,6 +63,7 @@ public class GalaxyInitializer : MonoBehaviour
         if (!added)
         {
             cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
+            GenerateGpuParticles(numGpuParticles);
             added = true;
         }
 
@@ -87,8 +80,10 @@ public class GalaxyInitializer : MonoBehaviour
         PhysicalParticle[] cpu_particles = new PhysicalParticle[num_particles];
 
         Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
-        float tileRadius2 = (0.15f * center_offset).sqrMagnitude;
-        float gaussFactor = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadius2) * 10000 * cellSize;
+        float tileRadiusSqr1 = (center_offset * 0.2f).sqrMagnitude;
+        float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
+        float gaussFactor1 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr1) * 5000 * cellSize;
+        float gaussFactor2 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr2) * 10000 * cellSize;
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -113,8 +108,12 @@ public class GalaxyInitializer : MonoBehaviour
             }
             col -= 1;
 
+            PhysicalParticle p = new PhysicalParticle();
+
             Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
-            float y_range = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadius2) * gaussFactor;
+            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * gaussFactor1;
+            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * gaussFactor2;
+            p.position = cellSize * (new Vector3(unit_position.x, sampleGaussian(0, Mathf.Max(y_range_1, y_range_2)), unit_position.z) - center_offset);
 
             float hue_mean = h_mean[row, col];
             float hue_std = h_std[row, col];
@@ -127,11 +126,9 @@ public class GalaxyInitializer : MonoBehaviour
             float value_mean = v_mean[row, col];
             float value_std = v_std[row, col];
             float value_sample = sampleGaussian(value_mean, value_std);
-
-            PhysicalParticle p = new PhysicalParticle();
-            p.position = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) - center_offset);
             //p.color = Color.white;
             p.color = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
+
             p.mass = 1;
             p.size = 0.01f;
             p.velocity = Vector3.zero;
@@ -149,8 +146,10 @@ public class GalaxyInitializer : MonoBehaviour
         Color[] colors = new Color[num_particles];
 
         Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
-        float tileRadius2 = (0.15f * center_offset).sqrMagnitude;
-        float gaussFactor = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadius2) * 10000 * cellSize;
+        float tileRadiusSqr1 = (center_offset * 0.2f).sqrMagnitude;
+        float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
+        float gaussFactor1 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr1) * 5000 * cellSize;
+        float gaussFactor2 = 1.0f / Mathf.Sqrt(Mathf.PI * tileRadiusSqr2) * 10000 * cellSize;
 
         for (int i = 0; i < num_particles; i++)
         {
@@ -175,6 +174,11 @@ public class GalaxyInitializer : MonoBehaviour
             }
             col -= 1;
 
+            Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
+            float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * gaussFactor1;
+            float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * gaussFactor2;
+            positions[i] = cellSize * (new Vector3(unit_position.x, sampleGaussian(0, Mathf.Max(y_range_1, y_range_2)), unit_position.z) - center_offset);
+
             float hue_mean = h_mean[row, col];
             float hue_std = h_std[row, col];
             float hue_sample = sampleGaussian(hue_mean, hue_std);
@@ -187,10 +191,6 @@ public class GalaxyInitializer : MonoBehaviour
             float value_std = v_std[row, col];
             float value_sample = sampleGaussian(value_mean, value_std);
 
-            Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
-            float y_range = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadius2) * gaussFactor;
-            
-            positions[i] = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) - center_offset);
             colors[i] = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
             //colors[i] = Color.white;
             //scales[i] = 0.01f * Vector3.one;
@@ -224,7 +224,7 @@ public class GalaxyInitializer : MonoBehaviour
 
         if (densities.Count == 0)
         {
-            Debug.LogWarning("Empty file: " + galaxyCPUFile);
+            Debug.LogWarning("Empty file: " + galaxyFolder + galaxyCPUFileSuffix);
             return;
         }
 
@@ -259,7 +259,7 @@ public class GalaxyInitializer : MonoBehaviour
     }
 
     void SetUpHSVStructures() {
-        int[] dimensions = FindDimension(galaxyHMeanFile);
+        int[] dimensions = FindDimension(galaxyFolder + galaxyHMeanFileSuffix);
         int numRow = dimensions[0];
         int numCol = dimensions[1];
         h_mean = new float[numRow, numCol];
@@ -268,12 +268,12 @@ public class GalaxyInitializer : MonoBehaviour
         h_std = new float[numRow, numCol];
         s_std = new float[numRow, numCol];
         v_std = new float[numRow, numCol];
-        ReadHSVFile(galaxyHMeanFile, h_mean);
-        ReadHSVFile(galaxySMeanFile, s_mean);
-        ReadHSVFile(galaxyVMeanFile, v_mean);
-        ReadHSVFile(galaxyHStdFile, h_std);
-        ReadHSVFile(galaxySStdFile, s_std);
-        ReadHSVFile(galaxyVStdFile, v_std);
+        ReadHSVFile(galaxyFolder + galaxyHMeanFileSuffix, h_mean);
+        ReadHSVFile(galaxyFolder + galaxySMeanFileSuffix, s_mean);
+        ReadHSVFile(galaxyFolder + galaxyVMeanFileSuffix, v_mean);
+        ReadHSVFile(galaxyFolder + galaxyHStdFileSuffix, h_std);
+        ReadHSVFile(galaxyFolder + galaxySStdFileSuffix, s_std);
+        ReadHSVFile(galaxyFolder + galaxyVStdFileSuffix, v_std);
     }
 
 

@@ -186,7 +186,7 @@ public class CPUParticleManager : MonoBehaviour
         PrepareMaterial(ps_material, m_Particle);
 
         SetDefaultColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
-        SetDefaultEmission(new Color(0.5f, 0.5f, 0.5f, 0.8f));
+        SetDefaultEmission(new Color(1f, 1f, 1f, 1f));
 
         ParticleSystem.EmissionModule em = ps.emission;
         em.enabled = false;
