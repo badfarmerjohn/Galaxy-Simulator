@@ -26,7 +26,11 @@ public class GalaxyInitializer : MonoBehaviour
     CPUParticleManager cpu_particles_manager;
     GPUParticleManager gpu_particles_manager;
 
+    PhysicalParticle[] cpu_particles;
+
     bool added = false;
+
+    PhysicalParticleSimulator simulator;
 
     // Start is called before the first frame update
     void Start()
@@ -44,6 +48,8 @@ public class GalaxyInitializer : MonoBehaviour
         {
             gpu_particles_manager = gameObject.AddComponent<GPUParticleManager>();
         }
+
+        simulator = new PhysicalParticleSimulator();
     }
 
     // Update is called once per frame
@@ -51,8 +57,13 @@ public class GalaxyInitializer : MonoBehaviour
     {
         if (!added)
         {
-            cpu_particles_manager.AddParticles(GenerateCpuParticles(numCpuParticles), 0, numCpuParticles);
+            cpu_particles = GenerateCpuParticles(numCpuParticles);
+            cpu_particles_manager.AddParticles(cpu_particles, 0, numCpuParticles);
+
+            simulator.SetParticles(cpu_particles);
+
             GenerateGpuParticles(numGpuParticles);
+
             added = true;
         }
 
@@ -60,6 +71,15 @@ public class GalaxyInitializer : MonoBehaviour
         {
             gpu_particles_manager.Clear();
             GenerateGpuParticles(numGpuParticles);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (cpu_particles != null)
+        {
+            simulator.PerformTimestep(Time.fixedDeltaTime);
+            cpu_particles_manager.UpdateParticlePositions(cpu_particles);
         }
     }
 
@@ -101,7 +121,7 @@ public class GalaxyInitializer : MonoBehaviour
             PhysicalParticle p = new PhysicalParticle();
             p.position = cellSize * (new Vector3(unit_position.x, (Random.value - 0.5f) * y_range, unit_position.z) - center_offset);
             p.color = Color.white;
-            p.mass = 1;
+            p.mass = 100000;
             p.size = 0.01f;
             p.velocity = Vector3.zero;
             cpu_particles[i] = p;

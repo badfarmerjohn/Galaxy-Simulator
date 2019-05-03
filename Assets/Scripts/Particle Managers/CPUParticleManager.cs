@@ -96,7 +96,7 @@ public class CPUParticleManager : MonoBehaviour
         OnParticlesChanged(particles.Length);
     }
 
-    void OnParticlesChanged(int new_particle_count)
+    public void OnParticlesChanged(int new_particle_count)
     {
         this.new_particle_count = new_particle_count;
         needs_update = true;
