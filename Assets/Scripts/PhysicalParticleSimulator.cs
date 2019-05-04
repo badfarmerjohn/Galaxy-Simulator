@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PhysicalParticleSimulator
@@ -9,8 +10,24 @@ public class PhysicalParticleSimulator
     uint num_particles;
     PhysicalParticle[] physical_particles;
 
-    public PhysicalParticleSimulator(PhysicalParticle[] particles = null, float gravitational_constant = 6.67408e-11f)
+    class ParticleAggregate
     {
+        public List<PhysicalParticle> particles = new List<PhysicalParticle>();
+        public Vector3 center_of_mass = new Vector3();
+        public float total_mass = 0;
+    }
+
+    public enum SimulatorAlgorithm
+    {
+        NAIVE,
+        HASHING
+    };
+    SimulatorAlgorithm simulation_algorithm;
+
+    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.NAIVE, PhysicalParticle[] particles = null, float gravitational_constant = 6.67408e-11f)
+    {
+        simulation_algorithm = method;
+
         physical_particles = particles;
         GRAVITATIONAL_CONSTANT = gravitational_constant;
         if (physical_particles != null)
@@ -27,6 +44,11 @@ public class PhysicalParticleSimulator
         }
     }
 
+    public void SetSimulationAlgorithm(SimulatorAlgorithm method)
+    {
+        simulation_algorithm = method;
+    }
+
     public void SetParticles (PhysicalParticle[] particles)
     {
         physical_particles = particles;
@@ -39,11 +61,16 @@ public class PhysicalParticleSimulator
         {
             return;
         }
-        for (uint i = 0; i < num_particles; ++i)
+        if (simulation_algorithm == SimulatorAlgorithm.NAIVE)
         {
-            Vector3 force_on_particle_i = NaiveForceOnParticle(i);
-            ApplyForce(i, force_on_particle_i, deltaT);
-            physical_particles[i].position += physical_particles[i].velocity * deltaT;
+            for (uint i = 0; i < num_particles; ++i)
+            {
+                Vector3 force_on_particle_i = NaiveForceOnParticle(i);
+                ApplyForce(i, force_on_particle_i, deltaT);
+            }
+        } else if (simulation_algorithm == SimulatorAlgorithm.HASHING)
+        {
+            HashingTimeStep(deltaT);
         }
     }
 
@@ -72,6 +99,45 @@ public class PhysicalParticleSimulator
             force += GRAVITATIONAL_CONSTANT * p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
         }
         return force;
+    }
+
+    void HashingTimeStep(float deltaT)
+    {
+        Dictionary<int, ParticleAggregate> spatial_hash = PartitionParticles(physical_particles, new Vector3(1f, 1f, 1f));
+        foreach (KeyValuePair<int, ParticleAggregate> curr_cell in spatial_hash)
+        {
+            ParticleAggregate curr_bucket = curr_cell.Value;
+            ParticleAggregate other_bucket;
+            foreach (PhysicalParticle particle in curr_bucket.particles)
+            {
+                Vector3 total_force = Vector3.zero;
+                foreach (KeyValuePair<int, ParticleAggregate> other_cell in spatial_hash)
+                {
+                    other_bucket = other_cell.Value;
+                    if (curr_bucket == other_bucket)
+                    {
+                        continue;
+                    }
+                    Vector3 position_difference = other_bucket.center_of_mass - particle.position;
+                    float distance = position_difference.magnitude;
+                    float pd_cubed = distance * distance * distance;
+                    total_force += other_bucket.total_mass * particle.mass / pd_cubed * position_difference;
+                }
+                foreach (PhysicalParticle other_particle in curr_bucket.particles)
+                {
+                    if (other_particle == particle)
+                    {
+                        continue;
+                    }
+                    Vector3 position_difference = other_particle.position - particle.position;
+                    float distance = position_difference.magnitude;
+                    float pd_cubed = distance * distance * distance;
+                    total_force += other_particle.mass * particle.mass / pd_cubed * position_difference;
+                }
+                total_force *= GRAVITATIONAL_CONSTANT;
+                particle.velocity += total_force / particle.mass * deltaT;
+            }
+        }
     }
 
     void ComputeCenterOfMass()
@@ -110,6 +176,35 @@ public class PhysicalParticleSimulator
             Vector3.OrthoNormalize(ref y_normal, ref dist_vector, ref velocity_direction);
             physical_particles[i].velocity = velocity_direction * velocity_magnitude;
         }
+    }
+
+    Dictionary<int, ParticleAggregate> PartitionParticles(PhysicalParticle[] particles, Vector3 cell_size)
+    {
+
+        Dictionary<int, ParticleAggregate> spatial_hash = new Dictionary<int, ParticleAggregate>();
+        for (int i = 0; i < particles.Length; i++)
+        {
+            PhysicalParticle p = particles[i];
+            int x_ind = Mathf.FloorToInt(p.position.x / cell_size.x);
+            int y_ind = Mathf.FloorToInt(p.position.y / cell_size.y);
+            int z_ind = Mathf.FloorToInt(p.position.z / cell_size.z);
+            int hash = x_ind * 113 + y_ind * 12769 + z_ind * 1442897;
+
+            ParticleAggregate bucket;
+            if (!spatial_hash.TryGetValue(hash, out bucket))
+            {
+                bucket = new ParticleAggregate();
+                spatial_hash[hash] = bucket;
+            }
+            bucket.particles.Add(p);
+            bucket.center_of_mass += p.position * p.mass;
+            bucket.total_mass += p.mass;
+        }
+        foreach (KeyValuePair<int, ParticleAggregate> pair in spatial_hash)
+        {
+            pair.Value.center_of_mass /= pair.Value.total_mass;
+        }
+        return spatial_hash;
     }
 
 }

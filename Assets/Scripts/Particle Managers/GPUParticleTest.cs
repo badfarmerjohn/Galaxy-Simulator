@@ -8,7 +8,7 @@ public class GPUParticleTest : MonoBehaviour
 
     GPUParticleManager manager;
 
-    int iteration = 0;
+    //int iteration = 0;
 
     // Start is called before the first frame update
     void Start()
