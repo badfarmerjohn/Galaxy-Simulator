@@ -44,8 +44,6 @@ public class PhysicalParticleSimulator
             Vector3 force_on_particle_i = NaiveForceOnParticle(i);
             ApplyForce(i, force_on_particle_i, deltaT);
             physical_particles[i].position += physical_particles[i].velocity * deltaT;
-
-            Debug.Log(physical_particles[i].velocity);
         }
     }
 
