@@ -20,11 +20,12 @@ public class PhysicalParticleSimulator
     public enum SimulatorAlgorithm
     {
         NAIVE,
-        HASHING
+        HASHING,
+        CIRCLE
     };
     SimulatorAlgorithm simulation_algorithm;
 
-    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.NAIVE, PhysicalParticle[] particles = null, float gravitational_constant = 0.01f)
+    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.CIRCLE, PhysicalParticle[] particles = null, float gravitational_constant = 0.000001f)
     {
         simulation_algorithm = method;
 
@@ -80,6 +81,13 @@ public class PhysicalParticleSimulator
                     ApplyForce(particle, force, deltaT);
                 }
             }
+        } else if (simulation_algorithm == SimulatorAlgorithm.CIRCLE)
+        {
+            for (uint i = 0; i < num_particles; ++i)
+            {
+                Vector3 force_on_particle_i = CircleApproximationForce(i);
+                ApplyForce(physical_particles[i], force_on_particle_i, deltaT);
+            }
         }
     }
 
@@ -100,7 +108,7 @@ public class PhysicalParticleSimulator
             float pd_cubed = distance * distance * distance;
             force += p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
         }
-        for (uint j = index + 1; j < num_particles; ++j) //messier to write 2 separate for loops but more optimized
+        for (uint j = index + 1; j < num_particles; ++j)
         {
             Vector3 position_difference = physical_particles[j].position - p_i.position;
             float distance = position_difference.magnitude;
@@ -108,6 +116,15 @@ public class PhysicalParticleSimulator
             force += p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
         }
         return force * GRAVITATIONAL_CONSTANT;
+    }
+
+    Vector3 CircleApproximationForce(uint index)
+    {
+        Vector3 dist = center_of_mass - physical_particles[index].position;
+        float mag = dist.magnitude;
+        Vector3 force = GRAVITATIONAL_CONSTANT * total_mass * physical_particles[index].mass * dist / (mag * mag * mag);
+        force.y = 0;
+        return force;
     }
 
     Vector3 HashingForce(Dictionary<int, ParticleAggregate> spatial_hash, ParticleAggregate curr_bucket, PhysicalParticle particle, float deltaT)
@@ -169,12 +186,13 @@ public class PhysicalParticleSimulator
         }
         for (uint i = 0; i < num_particles; ++i)
         {
-            Vector3 dist_vector = center_of_mass - physical_particles[i].position;
+            Vector3 dist_vector = physical_particles[i].position - center_of_mass;
             float R = dist_vector.magnitude;
             float velocity_magnitude = (float) Math.Sqrt(GRAVITATIONAL_CONSTANT * total_mass / R);
             Vector3 y_normal = new Vector3(0, 1, 0);
-            Vector3 velocity_direction = new Vector3(dist_vector.x / dist_vector.z, 0, dist_vector.z / dist_vector.x);
-            Vector3.OrthoNormalize(ref y_normal, ref dist_vector, ref velocity_direction);
+            Vector3 velocity_direction = new Vector3(dist_vector.z, 0, -dist_vector.x);
+            velocity_direction.Normalize();
+            //Vector3.OrthoNormalize(ref y_normal, ref dist_vector, ref velocity_direction);
             physical_particles[i].velocity = velocity_direction * velocity_magnitude;
         }
     }
