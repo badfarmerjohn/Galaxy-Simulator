@@ -98,16 +98,16 @@ public class PhysicalParticleSimulator
             Vector3 position_difference = physical_particles[j].position - p_i.position;
             float distance = position_difference.magnitude;
             float pd_cubed = distance * distance * distance;
-            force += GRAVITATIONAL_CONSTANT * p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
+            force += p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
         }
         for (uint j = index + 1; j < num_particles; ++j) //messier to write 2 separate for loops but more optimized
         {
             Vector3 position_difference = physical_particles[j].position - p_i.position;
             float distance = position_difference.magnitude;
             float pd_cubed = distance * distance * distance;
-            force += GRAVITATIONAL_CONSTANT * p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
+            force += p_i.mass * physical_particles[j].mass / pd_cubed * position_difference;
         }
-        return force;
+        return force * GRAVITATIONAL_CONSTANT;
     }
 
     Vector3 HashingForce(Dictionary<int, ParticleAggregate> spatial_hash, ParticleAggregate curr_bucket, PhysicalParticle particle, float deltaT)
