@@ -24,7 +24,7 @@ public class PhysicalParticleSimulator
     };
     SimulatorAlgorithm simulation_algorithm;
 
-    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.NAIVE, PhysicalParticle[] particles = null, float gravitational_constant = 6.67408e-11f)
+    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.NAIVE, PhysicalParticle[] particles = null, float gravitational_constant = 0.01f)
     {
         simulation_algorithm = method;
 
@@ -138,7 +138,7 @@ public class PhysicalParticleSimulator
             total_force += other_particle.mass * particle.mass / pd_cubed * position_difference;
         }
         total_force *= GRAVITATIONAL_CONSTANT;
-        particle.velocity += total_force / particle.mass * deltaT;
+        return total_force;
     }
 
     void ComputeCenterOfMass()
