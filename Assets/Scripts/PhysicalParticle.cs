@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class PhysicalParticle
 {
-  public float size;
-  public float mass;
-  public Vector3 position;
-  public Vector3 velocity;
-  public Color color;
+    public float size;
+    public float mass;
+    public Color color;
+    public Vector3 position;
+    public Vector3 velocity;
+    public Vector3 totalForce;
 
 }

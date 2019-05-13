@@ -6,6 +6,7 @@ using System.Threading;
 public class PhysicalParticleSimulator
 {
     float GRAVITATIONAL_CONSTANT = 6.67408e-11f;
+    float MIN_DISTANCE = 1e-6f;
     Vector3 center_of_mass;
     float total_mass;
     uint num_particles;
@@ -74,7 +75,7 @@ public class PhysicalParticleSimulator
         num_particles = (uint) physical_particles.Length;
     }
 
-    void Start()
+    public void Start()
     {
         if (should_stop)
         {
@@ -90,10 +91,12 @@ public class PhysicalParticleSimulator
                 gravity_threads[i].IsBackground = true;
                 gravity_threads[i].Start();
             }
+
+            need_updating = true;
         }
     }
 
-    void Stop()
+    public void Stop()
     {
         if (!should_stop)
         {
@@ -112,11 +115,7 @@ public class PhysicalParticleSimulator
     {
         while(!should_stop)
         {
-            curr_spatial_hash = PartitionParticles(physical_particles, cell_size);
-            lock (hash_lock)
-            {
-                iter = curr_spatial_hash.GetEnumerator();
-            }
+            next_spatial_hash = PartitionParticles(physical_particles, cell_size);
         }
     }
 
@@ -125,16 +124,25 @@ public class PhysicalParticleSimulator
         KeyValuePair<int, ParticleAggregate> curr_item;
         while (!should_stop)
         {
-            if (!need_updating || curr_spatial_hash == null)
+            if (!need_updating || (curr_spatial_hash == null && next_spatial_hash == null))
             {
                 continue;
             }
             lock (hash_lock)
             {
+                if (curr_spatial_hash == null)
+                {
+                    curr_spatial_hash = next_spatial_hash;
+                    iter = curr_spatial_hash.GetEnumerator();
+                }
                 curr_item = iter.Current;
                 if (!iter.MoveNext())
                 {
                     need_updating = false;
+                    if (next_spatial_hash != null)
+                    {
+                        curr_spatial_hash = next_spatial_hash;
+                    }
                     iter = curr_spatial_hash.GetEnumerator();
                 }
             }
@@ -145,9 +153,8 @@ public class PhysicalParticleSimulator
             }
             foreach (PhysicalParticle particle in curr_bucket.particles)
             {
-                Vector3 total_force = HashingForce(curr_spatial_hash, curr_bucket, particle, this.deltaT);
+                particle.totalForce = HashingForce(curr_spatial_hash, curr_bucket, particle, this.deltaT);
                 //Debug.Log("Force: " + total_force + "\t Velocity: " + particle.velocity + "\t dt: " + this.deltaT);
-                ApplyForce(particle, total_force, deltaT);
             }
         }
     }
@@ -171,13 +178,14 @@ public class PhysicalParticleSimulator
             {
                 Start();
                 return;
-            } else if (curr_spatial_hash == null)
-            {
-                return;
             }
             this.need_updating = true;
             this.deltaT = deltaT;
-            //Dictionary<int, ParticleAggregate> spatial_hash = PartitionParticles(physical_particles, cell_size);
+            foreach (PhysicalParticle particle in physical_particles)
+            {
+                ApplyForce(particle, particle.totalForce, deltaT);
+            }
+            //Dictionary<int, ParticleAggregate> curr_spatial_hash = PartitionParticles(physical_particles, cell_size);
             //Debug.Log("# Buckets: " + curr_spatial_hash.Count);
             //float avg_particle_count = 0;
             //foreach (KeyValuePair<int, ParticleAggregate> curr_cell in curr_spatial_hash)
@@ -250,6 +258,10 @@ public class PhysicalParticleSimulator
             }
             Vector3 position_difference = other_bucket.center_of_mass - particle.position;
             float distance = position_difference.magnitude;
+            if (distance < MIN_DISTANCE)
+            {
+                continue;
+            }
             float pd_cubed = distance * distance * distance;
             total_force += other_bucket.total_mass * particle.mass / pd_cubed * position_difference;
         }
@@ -261,10 +273,15 @@ public class PhysicalParticleSimulator
             }
             Vector3 position_difference = other_particle.position - particle.position;
             float distance = position_difference.magnitude;
+            if (distance < MIN_DISTANCE)
+            {
+                continue;
+            }
             float pd_cubed = distance * distance * distance;
             total_force += other_particle.mass * particle.mass / pd_cubed * position_difference;
         }
         total_force *= GRAVITATIONAL_CONSTANT;
+        //Debug.Log(total_force);
         return total_force;
     }
 
