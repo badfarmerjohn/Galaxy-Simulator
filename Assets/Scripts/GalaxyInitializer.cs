@@ -174,7 +174,7 @@ public class GalaxyInitializer : MonoBehaviour
         PhysicalParticle centerP = new PhysicalParticle();
         centerP.position = Vector3.zero;
         centerP.color = Color.black;
-        centerP.mass = totalMass;
+        centerP.mass = totalMass * 3;
         centerP.size = 0.001f;
         centerP.velocity = Vector3.zero;
         centerP.totalForce = Vector3.zero;

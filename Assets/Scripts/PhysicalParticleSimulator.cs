@@ -311,11 +311,11 @@ public class PhysicalParticleSimulator
         {
             ComputeCenterOfMass();
         }
-        for (uint i = 0; i < num_particles; ++i)
+        for (uint i = 1; i < num_particles; ++i)
         {
             Vector3 dist_vector = physical_particles[i].position - center_of_mass;
             float R = dist_vector.magnitude;
-            float velocity_magnitude = (float) Math.Sqrt(GRAVITATIONAL_CONSTANT * total_mass / R);
+            float velocity_magnitude = (float) Math.Sqrt(GRAVITATIONAL_CONSTANT * total_mass / (2 * R));
             Vector3 y_normal = new Vector3(0, 1, 0);
             Vector3 velocity_direction = new Vector3(dist_vector.z, 0, -dist_vector.x);
             velocity_direction.Normalize();
