@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2035111234}
-  m_IndirectSpecularColor: {r: 0.20719251, g: 0.20865886, b: 0.21081273, a: 1}
+  m_IndirectSpecularColor: {r: 0.20719253, g: 0.20865886, b: 0.21081273, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -482,7 +482,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   galaxyFolder: Assets/Galaxy Files/galaxy - edited
   numCpuParticles: 10000
-  numGpuParticles: 100000
+  numGpuParticles: 1000000
+  cellSize: 0.1
+  cellSizeFactor: 3
+  temp: 10
   doPhysics: 1
 --- !u!114 &797600213
 MonoBehaviour:

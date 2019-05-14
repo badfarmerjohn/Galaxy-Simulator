@@ -19,7 +19,9 @@ public class GalaxyInitializer : MonoBehaviour
     public int numCpuParticles = 0;
     public int numGpuParticles = 0;
 
-    float cellSize = 0.1f;
+    public float cellSize = 0.1f;
+    public float cellSizeFactor = 3;
+    public int temp = 10;
 
     float[] cumulative_row_densities;
     float[,] marginal_cumulative_col;
@@ -69,7 +71,9 @@ public class GalaxyInitializer : MonoBehaviour
         {
             cpu_particles = GenerateCpuParticles(numCpuParticles);
             cpu_particles_manager.AddParticles(cpu_particles, 0, numCpuParticles);
-            simulator = new PhysicalParticleSimulator(particles: cpu_particles);
+            simulator = new PhysicalParticleSimulator(Vector3.one * cellSize * Mathf.Sqrt(numCpuParticles) * Mathf.Log10(numCpuParticles), particles: cpu_particles,
+                method: PhysicalParticleSimulator.SimulatorAlgorithm.HASHING, gravitational_constant: 6.67408e-12f);
+            //simulator = new PhysicalParticleSimulator(Vector3.one * cellSize * Mathf.Sqrt(numCpuParticles) * Mathf.Log10(numCpuParticles), particles: cpu_particles);
 
             GenerateGpuParticles(numGpuParticles);
             added = true;
@@ -91,6 +95,11 @@ public class GalaxyInitializer : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        simulator.Stop();
+    }
+
     PhysicalParticle[] GenerateCpuParticles(int num_particles)
     {
         Debug.Log("Generating CPU Particles: " + num_particles);
@@ -103,11 +112,13 @@ public class GalaxyInitializer : MonoBehaviour
         float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
 
         cellSize = 3.0f / tileRadiusBase;
+        float meanMass = (tileRadiusBase * temp);
         
         float fudgeFactor1 = tileRadiusBase / 15;
         float fudgeFactor2 = tileRadiusBase / 75;
 
-        for (int i = 0; i < num_particles; i++)
+        float totalMass = 0;
+        for (int i = 1; i < num_particles; i++)
         {
             float rand1 = Random.value, rand2 = Random.value;
             int row;
@@ -150,11 +161,25 @@ public class GalaxyInitializer : MonoBehaviour
             float value_sample = sampleGaussian(value_mean, value_std);
             //p.color = Color.white;
             p.color = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
-            p.mass = 1;
+            p.mass = Mathf.Max(1, sampleGaussian(meanMass, meanMass / 2));
+            //p.mass = Mathf.Max(0.001f, sampleGaussian(1, 0.5f));
             p.size = Mathf.Pow(Random.value * 0.9f + 0.1f, 5) * 0.01f;
             p.velocity = Vector3.zero;
+            p.totalForce = Vector3.zero;
             cpu_particles[i] = p;
+
+            totalMass += p.mass;
         }
+
+        PhysicalParticle centerP = new PhysicalParticle();
+        centerP.position = Vector3.zero;
+        centerP.color = Color.black;
+        centerP.mass = totalMass * 3;
+        centerP.size = 0.001f;
+        centerP.velocity = Vector3.zero;
+        centerP.totalForce = Vector3.zero;
+        cpu_particles[0] = centerP;
+
         return cpu_particles;
     }
 

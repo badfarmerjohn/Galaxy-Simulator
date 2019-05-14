@@ -1,14 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading;
 
 public class PhysicalParticleSimulator
 {
     float GRAVITATIONAL_CONSTANT = 6.67408e-11f;
+    float MIN_DISTANCE = 1e-6f;
     Vector3 center_of_mass;
     float total_mass;
     uint num_particles;
     PhysicalParticle[] physical_particles;
+    Vector3 cell_size;
+
+    Dictionary<int, ParticleAggregate> curr_spatial_hash;
+    Dictionary<int, ParticleAggregate> next_spatial_hash;
+    Dictionary<int, ParticleAggregate>.Enumerator iter;
+    int[] hash_lock = new int[1];
+    Thread[] gravity_threads = new Thread[2];
+    Thread hashing_thread;
+    bool should_stop = true;
+    float deltaT;
+    bool need_updating = false;
 
     class ParticleAggregate
     {
@@ -25,7 +38,7 @@ public class PhysicalParticleSimulator
     };
     SimulatorAlgorithm simulation_algorithm;
 
-    public PhysicalParticleSimulator(SimulatorAlgorithm method = SimulatorAlgorithm.CIRCLE, PhysicalParticle[] particles = null, float gravitational_constant = 0.000001f)
+    public PhysicalParticleSimulator(Vector3 cell_size, SimulatorAlgorithm method = SimulatorAlgorithm.CIRCLE, PhysicalParticle[] particles = null, float gravitational_constant = 0.000001f)
     {
         simulation_algorithm = method;
 
@@ -43,6 +56,12 @@ public class PhysicalParticleSimulator
             total_mass = 0;
             center_of_mass = new Vector3();
         }
+        this.cell_size = cell_size;
+    }
+
+    ~PhysicalParticleSimulator()
+    {
+        Stop();
     }
 
     public void SetSimulationAlgorithm(SimulatorAlgorithm method)
@@ -54,6 +73,90 @@ public class PhysicalParticleSimulator
     {
         physical_particles = particles;
         num_particles = (uint) physical_particles.Length;
+    }
+
+    public void Start()
+    {
+        if (should_stop)
+        {
+            should_stop = false;
+
+            hashing_thread = new Thread(hash_worker_func);
+            hashing_thread.IsBackground = true;
+            hashing_thread.Start();
+
+            for (int i = 0; i < gravity_threads.Length; i++)
+            {
+                gravity_threads[i] = new Thread(new ThreadStart(hash_gravity_worker_func));
+                gravity_threads[i].IsBackground = true;
+                gravity_threads[i].Start();
+            }
+
+            need_updating = true;
+        }
+    }
+
+    public void Stop()
+    {
+        if (!should_stop)
+        {
+            should_stop = true;
+
+            hashing_thread.Abort();
+
+            for (int i = 0; i < gravity_threads.Length; i++)
+            {
+                gravity_threads[i].Abort();
+            }
+        }
+    }
+
+    void hash_worker_func()
+    {
+        while(!should_stop)
+        {
+            next_spatial_hash = PartitionParticles(physical_particles, cell_size);
+        }
+    }
+
+    void hash_gravity_worker_func()
+    {
+        KeyValuePair<int, ParticleAggregate> curr_item;
+        while (!should_stop)
+        {
+            if (!need_updating || (curr_spatial_hash == null && next_spatial_hash == null))
+            {
+                continue;
+            }
+            lock (hash_lock)
+            {
+                if (curr_spatial_hash == null)
+                {
+                    curr_spatial_hash = next_spatial_hash;
+                    iter = curr_spatial_hash.GetEnumerator();
+                }
+                curr_item = iter.Current;
+                if (!iter.MoveNext())
+                {
+                    need_updating = false;
+                    if (next_spatial_hash != null)
+                    {
+                        curr_spatial_hash = next_spatial_hash;
+                    }
+                    iter = curr_spatial_hash.GetEnumerator();
+                }
+            }
+            ParticleAggregate curr_bucket = curr_item.Value;
+            if (curr_bucket == null)
+            {
+                continue;
+            }
+            foreach (PhysicalParticle particle in curr_bucket.particles)
+            {
+                particle.totalForce = HashingForce(curr_spatial_hash, curr_bucket, particle, this.deltaT);
+                //Debug.Log("Force: " + total_force + "\t Velocity: " + particle.velocity + "\t dt: " + this.deltaT);
+            }
+        }
     }
 
     public void PerformTimestep(float deltaT)
@@ -71,16 +174,31 @@ public class PhysicalParticleSimulator
             }
         } else if (simulation_algorithm == SimulatorAlgorithm.HASHING)
         {
-            Dictionary<int, ParticleAggregate> spatial_hash = PartitionParticles(physical_particles, new Vector3(1f, 1f, 1f));
-            foreach (KeyValuePair<int, ParticleAggregate> curr_cell in spatial_hash)
+            if (should_stop)
             {
-                ParticleAggregate curr_bucket = curr_cell.Value;
-                foreach (PhysicalParticle particle in curr_bucket.particles)
-                {
-                    Vector3 force = HashingForce(spatial_hash, curr_cell.Value, particle, deltaT);
-                    ApplyForce(particle, force, deltaT);
-                }
+                Start();
+                return;
             }
+            this.need_updating = true;
+            this.deltaT = deltaT;
+            foreach (PhysicalParticle particle in physical_particles)
+            {
+                ApplyForce(particle, particle.totalForce, deltaT);
+            }
+            //Dictionary<int, ParticleAggregate> curr_spatial_hash = PartitionParticles(physical_particles, cell_size);
+            //Debug.Log("# Buckets: " + curr_spatial_hash.Count);
+            //float avg_particle_count = 0;
+            //foreach (KeyValuePair<int, ParticleAggregate> curr_cell in curr_spatial_hash)
+            //{
+            //    ParticleAggregate curr_bucket = curr_cell.Value;
+            //    foreach (PhysicalParticle particle in curr_bucket.particles)
+            //    {
+            //        Vector3 force = HashingForce(curr_spatial_hash, curr_cell.Value, particle, deltaT);
+            //        ApplyForce(particle, force, deltaT);
+            //    }
+            //    avg_particle_count += curr_bucket.particles.Count;
+            //}
+            //Debug.Log("# Particles/Bucket: " + (avg_particle_count / curr_spatial_hash.Count));
         } else if (simulation_algorithm == SimulatorAlgorithm.CIRCLE)
         {
             for (uint i = 0; i < num_particles; ++i)
@@ -123,7 +241,7 @@ public class PhysicalParticleSimulator
         Vector3 dist = center_of_mass - physical_particles[index].position;
         float mag = dist.magnitude;
         Vector3 force = GRAVITATIONAL_CONSTANT * total_mass * physical_particles[index].mass * dist / (mag * mag * mag);
-        force.y = 0;
+        //force.y = 0;
         return force;
     }
 
@@ -140,6 +258,10 @@ public class PhysicalParticleSimulator
             }
             Vector3 position_difference = other_bucket.center_of_mass - particle.position;
             float distance = position_difference.magnitude;
+            if (distance < MIN_DISTANCE)
+            {
+                continue;
+            }
             float pd_cubed = distance * distance * distance;
             total_force += other_bucket.total_mass * particle.mass / pd_cubed * position_difference;
         }
@@ -151,10 +273,15 @@ public class PhysicalParticleSimulator
             }
             Vector3 position_difference = other_particle.position - particle.position;
             float distance = position_difference.magnitude;
+            if (distance < MIN_DISTANCE)
+            {
+                continue;
+            }
             float pd_cubed = distance * distance * distance;
             total_force += other_particle.mass * particle.mass / pd_cubed * position_difference;
         }
         total_force *= GRAVITATIONAL_CONSTANT;
+        //Debug.Log(total_force);
         return total_force;
     }
 
@@ -184,11 +311,11 @@ public class PhysicalParticleSimulator
         {
             ComputeCenterOfMass();
         }
-        for (uint i = 0; i < num_particles; ++i)
+        for (uint i = 1; i < num_particles; ++i)
         {
             Vector3 dist_vector = physical_particles[i].position - center_of_mass;
             float R = dist_vector.magnitude;
-            float velocity_magnitude = (float) Math.Sqrt(GRAVITATIONAL_CONSTANT * total_mass / R);
+            float velocity_magnitude = (float) Math.Sqrt(GRAVITATIONAL_CONSTANT * total_mass / (2 * R));
             Vector3 y_normal = new Vector3(0, 1, 0);
             Vector3 velocity_direction = new Vector3(dist_vector.z, 0, -dist_vector.x);
             velocity_direction.Normalize();
