@@ -22,10 +22,55 @@
 <body>
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2019</h1>
-<h1 align="middle">Final Project Milestone: Galaxy Simulator</h1>
+<h1 align="middle">Final Report Webpage: Galaxy Simulator</h1>
 <h2 align="middle">Jeromy Lui, Ryan Meyer, Eric Zhang</h2>
 
 <br><br>
+
+
+<h2 align="middle">Abstract</h2>
+
+In this project, we built a simple galaxy simulator that is visually compelling. Given a certain galaxy image, we are able to initialize particles and physically simulate them. We have both CPU particles, which make up the physically simulated particles in our galaxy, and GPU particles which are used for realistic visual effects which are not part of the physical simulation.  
+
+<h2 align="middle">Technical Approach</h2>
+
+
+
+<h2 align="middle">Results</h2>
+
+<h2 align="middle">References</h2>
+
+
+<ul>
+  <li><b>Unity Game Engine</b>: we used Unity as our development platform as it has a robust rendering and physics pipeline, and has cross-platform compatibility.
+    <ul>
+      <li>
+      <b>Visual Effects Graph</b>: This is a new tool developed by Unity for its game engine. One of its core features is being able to render and manage a large number of particles.
+      </li>
+    </ul>
+  </li>
+  <li><a href="https://comp-astrophys-cosmol.springeropen.com/track/pdf/10.1186/s40668-017-0021-1">PKDGRAV3</a>: This research details the methods used by its authors to produce a highly performant simulation on an order of trillions of particles. While these computations were made on a supercomputer, we may still be able adapt many of their ideas to a smaller scale simulation on common hardware.
+  </li>
+  <li><a href="https://www.sciencedirect.com/science/article/pii/S0021999199963970">Strategies for Efficient Particle Resolution in the Direct Simulation Monte Carlo Method</a>: This paper reflects on the computational cost of Monte Carlo simulation for particle regions of varying density.
+  </li>
+  <li><a href="https://epubs.siam.org/doi/10.1137/0906008">An Efficient Program for Many-Body Simulation</a>: The authors of this research use a tree structure to improve the asymptotic runtime complexity of N-Body dynamics systems. This result may aid in computing gravitational forces for millions of particles in a galaxy.
+  </li>
+</ul>
+
+<h2 align="middle">Contributions from each team member</h2>
+
+<ul>
+  <li>Eric Zhang
+  </li>
+  <li>Ryan Meyer
+  </li>
+  <li>Jeromy Lui
+  </li>
+</ul>
+
+
+<h2 align="middle">End of final report webpage</h2>
+
 
 <h2 align="middle">Status Report</h2>
 
