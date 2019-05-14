@@ -30,26 +30,38 @@
 
 <h2 align="middle">Abstract</h2>
 
-In this project, we built a simple galaxy simulator that is visually compelling. Given a certain galaxy image, we are able to initialize particles and physically simulate them. We have both CPU particles, which make up the physically simulated particles in our galaxy, and GPU particles which are used for realistic visual effects which are not part of the physical simulation.  
+In this project, we built a simple galaxy simulator that is visually compelling. Given a certain galaxy image, we are able to initialize particles and physically simulate them. We have both CPU particles, which make up the physically simulated particles in our galaxy, and GPU particles which are used for realistic visual effects which are not part of the physical simulation. In our simulation, the GPU particles are used to mimic real phenomena such as space dust which are present in the simulation but do not affect the dynamics of the N-body system. 
 
 <h2 align="middle">Technical Approach</h2>
+
+<h3 align="middle">Galaxy Image Preprocessing</h3>
+
+The python script takes in a galaxy image and splits it into blocks. Then, it first takes the average pixel value of each block and exports that as a 2D array in some text file. The python script also does the same for the HSV values from each block, exporting those values to other text files. 
+
 
 
 
 <h2 align="middle">Results</h2>
 
-<h2 align="middle">References</h2>
+<div align="middle">
+<a href="http://youtube.com">link to video (not done yet)</a>
+</div>
 
+<h2 align="middle">References</h2>
 
 <ul>
   <li><b>Unity Game Engine</b>: we used Unity as our development platform as it has a robust rendering and physics pipeline, and has cross-platform compatibility.
     <ul>
+      <li><a href="https://docs.unity3d.com/ScriptReference/">Unity API Documentation</a>
+      </li>
+    </ul>
+    <ul>
       <li>
-      <b>Visual Effects Graph</b>: This is a new tool developed by Unity for its game engine. One of its core features is being able to render and manage a large number of particles.
+      <a href="https://unity.com/visual-effect-graph">Visual Effects Graph</a>: This is a new tool developed by Unity for its game engine. One of its core features is being able to render and manage a large number of particles.
       </li>
     </ul>
   </li>
-  <li><a href="https://comp-astrophys-cosmol.springeropen.com/track/pdf/10.1186/s40668-017-0021-1">PKDGRAV3</a>: This research details the methods used by its authors to produce a highly performant simulation on an order of trillions of particles. While these computations were made on a supercomputer, we may still be able adapt many of their ideas to a smaller scale simulation on common hardware.
+  <li><a href="https://comp-astrophys-cosmol.springeropen.com/track/pdf/10.1186/s40668-017-0021-1">PKDGRAV3</a>: This research details the methods used by its authors to produce a highly performant simulation on an order of trillions of particles.
   </li>
   <li><a href="https://www.sciencedirect.com/science/article/pii/S0021999199963970">Strategies for Efficient Particle Resolution in the Direct Simulation Monte Carlo Method</a>: This paper reflects on the computational cost of Monte Carlo simulation for particle regions of varying density.
   </li>
@@ -61,10 +73,26 @@ In this project, we built a simple galaxy simulator that is visually compelling.
 
 <ul>
   <li>Eric Zhang
+    <ul>
+      <li>Created CPU and GPU particle managers and higher level functions.
+      </li>
+    </ul>
+    <ul>
+      <li>Worked on initializing particle location and color.
+      </li>
+    </ul>
   </li>
   <li>Ryan Meyer
   </li>
   <li>Jeromy Lui
+    <ul>
+      <li>Worked on python scripts to split galaxy images into grids and take various distributions based on density and color and input it into text files.
+      </li>
+    </ul>
+     <ul>
+      <li>Worked on color correction for both CPU and GPU particles.
+      </li>
+    </ul>
   </li>
 </ul>
 
