@@ -22,11 +22,10 @@
 <body>
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2019</h1>
-<h1 align="middle">Final Report Webpage: Galaxy Simulator</h1>
+<h1 align="middle">Final Project: Galaxy Simulator</h1>
 <h2 align="middle">Jeromy Lui, Ryan Meyer, Eric Zhang</h2>
 
 <br><br>
-
 
 <h2 align="middle">Abstract</h2>
 
@@ -57,13 +56,53 @@ In this project, we built a simple galaxy simulator that is visually compelling.
 <h4>Velocity Initialization</h4>
 Velocity was initialized proportional to the square root of the total mass of the galaxy and inversly proportional to the square root of the distance of the particle from the center. The reasoning behind this was purely visual, because we didn't want the particles farther away from the center, which had a weaker pull towards the center, to have too high of a velocity and thus fly out of the galaxy.
 
+<h2 align="middle">Physics Simulation</h3>
+<p>
+  The main problem we aimed to tackle with this project was how to simulate real gravitational N-Body dynamics systems while still keeping a high framerate and particle count.
+  This became a task to find a healthy balance between performance optimizations and loss of realism. We implemented and compared 3 different systems to simulate the physics of our galaxy.
+  To look at the performace of our different systems, we compared the framerate of our simulation to the number of particles being simulated on the CPU.
+</p>
 
+<p>
+    Our first method to simulate the N-Body physics of our galaxy was to use a 1:1 implementation of real life physics. Essentially, each particle in the system is given a force equal to 
+    the sum of all gravitational forces between it and every other particle in the system. This method, while the most physically accurate, is the slowest, as each call to update particle 
+    positions takes O(n^2) operations in terms the number of simulated particles.
+</p>
+<p>
+    <img src="naive.png" align="center">
+</p>
+<p>
+    Another physics method we implemented in simulating N-Body dynamics in our galaxy is the circular orbit approximation method. Each particle is given a force equivalent to the total 
+    mass of the system being concentrated at the center of mass of the galaxy. This method is constant time per particle update, so the simulation update call is O(n) overall, and allows for 
+    the greatest number of particles to be simulated on the CPU. The physical accuracy of this system decreases the further towards the center of the galaxy, as particles closer to the center are given a force as if 
+    all other mass was inside of their orbit, even though there are many particles further away in orbit than the centered particles are. As a result, particles which are far away from the galactic center 
+    of mass have pretty realistic behavior, while particles in the center may move erratically at times.
+</p>
+<p>
+    <img src="circle.png" align="center">
+</p>
+<p>
+    (DESCRIPTION OF HASHING METHOD)
+</p>
+<p>
+    <img src="hashing.png" align="center">
+</p>
+<p>
+    Here are the results for all three methods put together:
+</p>
+<p>
+    <img src="all3.png" align="center">
+</p>
+<p>
+    The circle approximation performed roughly as well as the spatial hashing approach, and both of these do much better than the naive algorithm as expected. However, since we 
+    are conceding some physical accuracy for both methods compared to the naive, it is important to look at the drawbacks of this performance gain. With spatial hashing, we lose the fine 
+    details in the direction of forces since particle forces are grouped into buckets rather than each having individual directions. With circular approximation, particles towards the center 
+    have less realistic orbiting behavior. These visual errata are small, and are not nearly as noticable as the steep framerate drop that occurs when using the naive force calculations, so the other 
+    methods are preferrable for such a large simulation.
+</p>
 
 <h2 align="middle">Results</h2>
-
-<div align="middle">
-<a href="http://youtube.com">link to video (not done yet)</a>
-</div>
+<iframe width="560" height="315"  src="https://www.youtube.com/embed/JJJzkBQ2yUM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <h2 align="middle">References</h2>
 
@@ -79,11 +118,11 @@ Velocity was initialized proportional to the square root of the total mass of th
       </li>
     </ul>
   </li>
-  <li><a href="https://comp-astrophys-cosmol.springeropen.com/track/pdf/10.1186/s40668-017-0021-1">PKDGRAV3</a>: This research details the methods used by its authors to produce a highly performant simulation on an order of trillions of particles.
-  </li>
-  <li><a href="https://www.sciencedirect.com/science/article/pii/S0021999199963970">Strategies for Efficient Particle Resolution in the Direct Simulation Monte Carlo Method</a>: This paper reflects on the computational cost of Monte Carlo simulation for particle regions of varying density.
-  </li>
-  <li><a href="https://epubs.siam.org/doi/10.1137/0906008">An Efficient Program for Many-Body Simulation</a>: The authors of this research use a tree structure to improve the asymptotic runtime complexity of N-Body dynamics systems. This result may aid in computing gravitational forces for millions of particles in a galaxy.
+  <li>
+    <b>
+      N-Body Physics
+    </b>: we used this resource as a guide to ensure the physical accuracy of our simulation, and for inspiration for our performance optimization methods.
+    https://www.cs.cmu.edu/afs/cs/project/pscico-guyb/realworld/www/nbody.html
   </li>
 </ul>
 
@@ -101,6 +140,22 @@ Velocity was initialized proportional to the square root of the total mass of th
     </ul>
   </li>
   <li>Ryan Meyer
+      <ul>
+          <li>Created physics simulator for CPU particles, including the naive and circular force approximation methods.
+          </li>
+        </ul>
+        <ul>
+          <li>Calculated physical properties of galaxy to be used by physics simulator (center of mass, initial particle velocities and directions).
+          </li>
+        </ul>
+        <ul>
+            <li>Created cubemap skybox for background stars / nebulae.
+            </li>
+        </ul>
+        <ul>
+            <li>Ran performance tests and plotted reslts.
+            </li>
+        </ul>
   </li>
   <li>Jeromy Lui
     <ul>
@@ -114,29 +169,4 @@ Velocity was initialized proportional to the square root of the total mass of th
   </li>
 </ul>
 
-
-<h2 align="middle">End of final report webpage</h2>
-
-
-<h2 align="middle">Status Report</h2>
-
-<p>We have accomplished the foundational behavior for the camera in Unity, CPU particles (which will make up the physically simulated particles in our galaxy), and GPU particles (which will be used for realistic visual effects which are not part of the physical simulation). The CPU particles will have their positions updated by computing the dynamics of an N-body gravitational system. The GPU particles will be used to mimic real phenomena such as space dust which are present in the simulation but do not affect the dynamics of the N-body system. The preliminary results are that we are able to manage the particles and incrementally add more particles using Unity. We have plans to implement mathematical models for galaxies. One of the ideas we will be implementing is to have a galaxy model based off of the gaussian distribution on the x and z axis. Then for the y axis, we uniformly sample in the range of the guassian distribution. In terms of our progress relative to our plan, we are bit behind, as there are have been some changes to our plans. One thing we found out is that the GPU particles cannot be physically simulated, so we had to make large changes to our project. We plan to make this up by meeting up more this week for longer hours. 
-</p>
-
-
-
-<h2 align="middle">Milestone Video</h2>
-<div align="middle">
-<a href="https://youtu.be/lNb5_0_ISnk">link to video</a>
-</div>
-
-<h2 align="middle">Presentation Slides</h2>
-
-<div align="middle">
-<a href="https://docs.google.com/presentation/d/1xu2ZrHzIvKNY5ZIkZvRPSkFjklSIQg1v50egWpnesqE/edit?usp=sharing">link to slides</a>
-</div>
-
-
-
-</body>
 </html>
