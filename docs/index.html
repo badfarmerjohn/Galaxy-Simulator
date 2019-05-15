@@ -23,7 +23,7 @@
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2019</h1>
 <h1 align="middle">Final Project: Galaxy Simulator</h1>
-<h2 align="middle">Jeromy Lui, Ryan Meyer, Eric Zhang</h2>
+<h2 align="middle">Jeromy Lui &nbsp | &nbsp Ryan Meyer &nbsp | &nbsp Eric Zhang</h2>
 
 <br><br>
 
@@ -63,6 +63,7 @@ Velocity was initialized proportional to the square root of the total mass of th
   To look at the performace of our different systems, we compared the framerate of our simulation to the number of particles being simulated on the CPU.
 </p>
 
+<h3 align="middle">Naive Method</h3>
 <p>
     Our first method to simulate the N-Body physics of our galaxy was to use a 1:1 implementation of real life physics. Essentially, each particle in the system is given a force equal to 
     the sum of all gravitational forces between it and every other particle in the system. This method, while the most physically accurate, is the slowest, as each call to update particle 
@@ -71,6 +72,7 @@ Velocity was initialized proportional to the square root of the total mass of th
 <p>
     <img src="naive.png" align="center">
 </p>
+<h3 align="middle">Circle Approximation Method</h3>
 <p>
     Another physics method we implemented in simulating N-Body dynamics in our galaxy is the circular orbit approximation method. Each particle is given a force equivalent to the total 
     mass of the system being concentrated at the center of mass of the galaxy. This method is constant time per particle update, so the simulation update call is O(n) overall, and allows for 
@@ -81,12 +83,23 @@ Velocity was initialized proportional to the square root of the total mass of th
 <p>
     <img src="circle.png" align="center">
 </p>
+<h3 align="middle">Spatial Hashing Method</h3>
 <p>
-    (DESCRIPTION OF HASHING METHOD)
+    In the hasing method, we used a spatial hash, inspired by <a href="https://cs184.eecs.berkeley.edu/sp19/article/34/assignment-4-cloth-simulation">Project 4's self-c0llision method</a>. We hash each of the objects into buckets that enclose spatially exclusive spaces. While doing so, we keep track of a bucket's total mass and center of mass. During the force updatge section, the total force on each particle consists of two sums. First, the naive method is used between the particle and all other particles in its bucket. Then the force between the particle and every other bucket (except the one its in) is applied to it. Essentially, all particles in another bucket are assumed to be at the position of the center of that other bucket. This is based on the assumption that forces from particles in another bucket seem to come from the same general direction, so it's not too far off to assume that they all come from the center of mass in that bucket, in which case, we can just use the total mass in that bucket to represent all the particles in the bucket.
+</p>
+<p>
+  However, even this method in its naive form is not fast enough to handle a large number of particles at a high frame rate. As with most speed-ups in this kind of real time simulation, we found ways to trade-off the accuracy of the simulation. The largest source of complexity in the method is the total force computation for each particle. The naive method is used between particles of a bucket, which leads to a complexity of O(N^2), where N is the average number of particles in a bucket. Then the naive method is performewd between each particle of the bucket and every other bucket other than its own, leading to a complexity of O(MN), where M is the number of buckets. The overall compelxity of this method is O(N^2 + MN). The other two main tasks were spatial hashing and doing velocity/position updates, both of which have an overall complexity of O(MN). We did not explore a way to reduce this complexity other than to tune the size of the buckets. Instead, we split the work over different threads. Specifically, we only did velocity/position updates, which is linear to the number of particles, in the main render thread. That way the render thread is not held up and the simulation (both the camera and particle movements) are smooth. One thread updates the spatial hash continuously, and another two threads share the task of updating the total forces on each particle.
+</p>
+<p>
+  the main source of physical error in this threaded method is the forced independency of these problems. The force calculation threads may or may not be using an outdated spatial hash, so that particles that are in the same bucket actually have positions that might not belong to that bucket. Therefore, the fine-grain calculation may be unecessarily performed on partical pairs that should be in different buckets while neglecting particle pairs that should be in the same bucket in the current iteration but aren't since the spatial hash hasn't updated yet. Additionally, If the force updates don't happen as fast as the render cycle, the render thread may be using old forces to update the velocity. In our experience, the hashing task is much faster than the force update task, which is the bottleneck. Regardless, the simulation is no longer laggy due to the fact that the rate of force updates does not affect the rate of position/velocity updates.
+</p>
+<p>
+  Inspiried by the technique of Verlet integration, we constrained that particles be within certain bounds of the galaxy. If they drift out of those bounds, they are reset to a randomly sampled position within the galaxy, using the same importance sampling in galaxy initialization.
 </p>
 <p>
     <img src="hashing.png" align="center">
 </p>
+<h3 align="middle">Overall</h3>
 <p>
     Here are the results for all three methods put together:
 </p>
@@ -133,9 +146,13 @@ Velocity was initialized proportional to the square root of the total mass of th
     <ul>
       <li>Created CPU and GPU particle managers and higher level functions.
       </li>
-    </ul>
-    <ul>
-      <li>Worked on initializing particle location and color.
+      <li>Worked on giving dummy GPU particles circular velocity.
+      </li>
+      <li>Implemented particle location and color initialization using importance sampling.
+      </li>
+      <li>Implemented spatial hashing simulation method and multi-threaded speed=ups to this method.
+      </li>
+      <li>Modified camera movement to be galaxy-centric.
       </li>
     </ul>
   </li>
@@ -159,7 +176,7 @@ Velocity was initialized proportional to the square root of the total mass of th
   </li>
   <li>Jeromy Lui
     <ul>
-      <li>Worked on python scripts to split galaxy images into grids and take various distributions based on density and color and input it into text files.
+      <li>Worked on python scripts to "tile-ize" galaxy images into grids and take various distributions based on density and color and dump to parseable text files.
       </li>
     </ul>
      <ul>
