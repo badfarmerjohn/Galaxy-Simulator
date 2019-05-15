@@ -38,10 +38,10 @@ public class PhysicalParticleSimulator
     };
     SimulatorAlgorithm simulation_algorithm;
 
-    public PhysicalParticleSimulator(Vector3 cell_size, SimulatorAlgorithm method = SimulatorAlgorithm.CIRCLE, PhysicalParticle[] particles = null, float gravitational_constant = 0.000001f)
+    public PhysicalParticleSimulator(Vector3 cell_size, SimulatorAlgorithm method = SimulatorAlgorithm.NAIVE, PhysicalParticle[] particles = null, float gravitational_constant = 0.000001f)
     {
         simulation_algorithm = method;
-
+        Debug.Log("simulation method is " + simulation_algorithm);
         physical_particles = particles;
         GRAVITATIONAL_CONSTANT = gravitational_constant;
         if (physical_particles != null)
