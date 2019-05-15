@@ -22,11 +22,18 @@
 <body>
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2019</h1>
+<<<<<<< HEAD
+<h1 align="middle">Final Project: Galaxy Simulator</h1>
+=======
 <h1 align="middle">Final Report Webpage: Galaxy Simulator</h1>
+>>>>>>> 5d04ccd16079f0778e9701b8faa385b8d2ad6857
 <h2 align="middle">Jeromy Lui, Ryan Meyer, Eric Zhang</h2>
 
 <br><br>
 
+<<<<<<< HEAD
+<h1 align="middle">Technical Approach</h1>
+=======
 
 <h2 align="middle">Abstract</h2>
 
@@ -101,16 +108,47 @@ The python script takes in a galaxy image and splits it into blocks. Then, it fi
 
 
 <h2 align="middle">Status Report</h2>
+>>>>>>> 5d04ccd16079f0778e9701b8faa385b8d2ad6857
 
-<p>We have accomplished the foundational behavior for the camera in Unity, CPU particles (which will make up the physically simulated particles in our galaxy), and GPU particles (which will be used for realistic visual effects which are not part of the physical simulation). The CPU particles will have their positions updated by computing the dynamics of an N-body gravitational system. The GPU particles will be used to mimic real phenomena such as space dust which are present in the simulation but do not affect the dynamics of the N-body system. The preliminary results are that we are able to manage the particles and incrementally add more particles using Unity. We have plans to implement mathematical models for galaxies. One of the ideas we will be implementing is to have a galaxy model based off of the gaussian distribution on the x and z axis. Then for the y axis, we uniformly sample in the range of the guassian distribution. In terms of our progress relative to our plan, we are bit behind, as there are have been some changes to our plans. One thing we found out is that the GPU particles cannot be physically simulated, so we had to make large changes to our project. We plan to make this up by meeting up more this week for longer hours. 
+<h2 align="middle">Physics Simulation</h2>
+<p>
+  The main problem we aimed to tackle with this project was how to simulate real gravitational N-Body dynamics systems while still keeping a high framerate and particle count.
+  This became a task to find a healthy balance between performance optimizations and loss of realism. We implemented and compared 3 different systems to simulate the physics of our galaxy.
+  To look at the performace of our different systems, we compared the framerate of our simulation to the number of particles being simulated on the CPU.
+</p>
+
+<p>
+    Our first method to simulate the N-Body physics of our galaxy was to use a 1:1 implementation of real life physics. Essentially, each particle in the system is given a force equal to 
+    the sum of all gravitational forces between it and every other particle in the system. This method, while the most physically accurate, is the slowest, as each call to update particle 
+    positions takes O(n^2) operations in terms the number of simulated particles.
+</p>
+<p>
+    (TEST RESULTS FOR NAIVE SIM METHOD)
+</p>
+<p>
+    (DESCRIPTION OF HASHING METHOD)
+</p>
+<p>
+    (TEST RESULTS FOR HASHING METHOD)
+</p>
+<p>
+    The final method we implemented in simulating N-Body dynamics in our galaxy is the circular orbit approximation method. Each particle is given a force equivalent to the total 
+    mass of the system being concentrated at the center of mass of the galaxy. This method is constant time per particle update, so the simulation update call is O(n) overall, and allows for 
+    the greatest number of particles to be simulated on the CPU. The physical accuracy of this system decreases the further towards the center of the galaxy, as particles closer to the center are given a force as if 
+    all other mass was inside of their orbit, even though there are many particles further away in orbit than the centered particles are. As a result, particles which are far away from the galactic center 
+    of mass have pretty realistic behavior, while particles in the center may move erratically at times.
+</p>
+<p>
+    (TEST RESULTS FOR HASHING METHOD)
 </p>
 
 
 
-<h2 align="middle">Milestone Video</h2>
-<div align="middle">
-<a href="https://youtu.be/lNb5_0_ISnk">link to video</a>
-</div>
+<h2 align="middle">Video of our galaxy simulator in action</h2>
+<p>
+  REPLACE WITH NEW VIDEO ONCE MADE
+</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/FfHGP0V7KE0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <h2 align="middle">Presentation Slides</h2>
 
