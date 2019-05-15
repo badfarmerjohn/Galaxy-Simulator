@@ -47,8 +47,11 @@ if __name__ == "__main__":
     # num_tile_rows = 102
     # num_tile_cols = 173
 
-    num_tile_rows = 714
-    num_tile_cols = 865
+    #num_tile_rows = 714
+    #num_tile_cols = 865
+
+    num_tile_rows = 857
+    num_tile_cols = 700
 
     blocks = blockshaped(grayscale, num_tile_rows, num_tile_cols)
     
