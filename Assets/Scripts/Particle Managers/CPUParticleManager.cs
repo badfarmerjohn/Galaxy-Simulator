@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEditor;
+using System.IO;
 
 public class CPUParticleManager : MonoBehaviour
 {
@@ -35,7 +36,8 @@ public class CPUParticleManager : MonoBehaviour
             ps = gameObject.AddComponent<ParticleSystem>();
         }
         ps_renderer = GetComponent<ParticleSystemRenderer>();
-        m_Particle = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Textures/Star Texture - White.png", typeof(Texture2D));
+        m_Particle = new Texture2D(32, 32);
+        m_Particle.LoadImage(File.ReadAllBytes("Assets/Textures/Star Texture - White.png"));
         InitializeParticleSystem(ps, ps_renderer, initialParticleCount);
         ps.SetParticles(_particles, num_particles, 0);
 

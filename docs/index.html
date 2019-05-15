@@ -34,10 +34,28 @@ In this project, we built a simple galaxy simulator that is visually compelling.
 
 <h2 align="middle">Technical Approach</h2>
 
-<h3 align="middle">Galaxy Image Preprocessing</h3>
-
-The python script takes in a galaxy image and splits it into blocks. Then, it first takes the average pixel value of each block and exports that as a 2D array in some text file. The python script also does the same for the HSV values from each block, exporting those distributions to other text files. Then in the unity code, we sampled particle location and colors from these distrubutions, similar to how we did Monte Carlo integration from previous projects. 
-
+<h3 align="middle">Galaxy Initialization</h3>
+<h4>Position Initialization</h4>
+<p>
+  One unforseen challenge in the project was initializing the galaxy. While we may be able to simulate the particle's position and velocity in the next time step given the state of the galaxy in the current timestep, we need to give all the particles initial positions and velocities. In addition, although the particles don't change size, color, or mass in this version of the simulator, they still need to be initialized to some value. The challenge is to do this realistically so that it resembles a galaxy initially. The realism afterward is then left to the simulation time-stepping.
+</p>
+<p>
+  We realized that the position of any single particle is not as important as the overall distribution of the particles. Therefore, we used a reference galaxy image as a reference for the distribution of particles from which we sampled positions. Ideally, this would be a decently high resolution image of a galaxy from a bird's eye view. Using a Python script, we segment the image into tiles and compute the average luminance of the tile, which we take as the relative density of particles in that area of the galaxy. We then normlize these densities and use them to describe a discretized probability distribution (think: buckets).
+<p>
+  For each particle, we sample two random variables and use the inversion method similar to what was used in importance sampling in Project 3-2 to find the corresponding tile of the original image that this particle should be spawned in. Wihtin that tile, we uniformly sample the position of the particle (indendently in each axis). The method was inspired by the importance sampling used in <a href="https://cs184.eecs.berkeley.edu/sp19/article/29/assignment-3-2,-part-3-environme">environment mapping section</a>. Again, the distribution is based off the relative luminance of the different tiles. Critical in this method is the assumption that luminance is a good estimate of the particle density of that section of the galaxy. This is works conveniently for our simulation task since in space, everything of visual significance is either emitting or reflecting light. We note that this assumption does not work well in many other types of simulation, including space simulation requiring a high degree of accuracy, as there are many things that don't emit or reflect light (eg. black holes, dark matter, etc) that would greatly affect the gravity simulations.
+</p>
+<p>
+  We also note that with more buckets, the initial galaxy looks more realistic, as it can capture a lot of the emtpy spaces between, say, different arms of the galaxy. For regular images, using each pixel as a bucket is very reasonable, since at such scales, even a single pixel is representing a large part of the galaxy. As the number of buckets decreases (and thus the size of each bucket increases), the buckets become more conspicuous in the final simulation, as you can see the boundaries of each bucket (particles seem to form a loose rectangular prism).
+</p>
+<p>
+  Another trick we used to get a more realistic galaxy is to increase the contrast of the galaxy image. While that makes the reference image look less aesthetically pleasing, it helps push the resulting distribution be more pronounced, encouraging particles to be spawned near the center and arms of the galaxy. The "bushiness" of the galaxy is not greatly affected since the randomness within a tile adds "bushiness".
+</p>
+<h4>Color Initialization</h4>
+<p>
+  We employed a similar approach to assign colors to each particle. Using the same image tiles as above, we calculated the color statistics on each tile. Specifically, we calculated the mean and standard deviation of the hue, saturation, and value values in each tile. When a particle was initialized in a specific tile, the hue, saturation and value of its color would be sampled from a gaussian distribution with the mean and standard deviation of that tile.
+</p>
+<h4>Velocity Initialization</h4>
+Velocity was initialized proportional to the square root of the total mass of the galaxy and inversly proportional to the square root of the distance of the particle from the center. The reasoning behind this was purely visual, because we didn't want the particles farther away from the center, which had a weaker pull towards the center, to have too high of a velocity and thus fly out of the galaxy.
 
 
 

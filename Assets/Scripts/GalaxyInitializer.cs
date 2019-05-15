@@ -84,6 +84,8 @@ public class GalaxyInitializer : MonoBehaviour
             gpu_particles_manager.Clear();
             GenerateGpuParticles(numGpuParticles);
         }
+
+        ReinitializeParticles();
     }
 
     void FixedUpdate()
@@ -159,7 +161,6 @@ public class GalaxyInitializer : MonoBehaviour
             float value_mean = v_mean[row, col];
             float value_std = v_std[row, col];
             float value_sample = sampleGaussian(value_mean, value_std);
-            //p.color = Color.white;
             p.color = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
             p.mass = Mathf.Max(1, sampleGaussian(meanMass, meanMass / 2));
             //p.mass = Mathf.Max(0.001f, sampleGaussian(1, 0.5f));
@@ -247,6 +248,75 @@ public class GalaxyInitializer : MonoBehaviour
         }
 
         gpu_particles_manager.AddPoints(positions, colors: colors);
+    }
+
+    void ReinitializeParticles()
+    {
+        Vector3 center_offset = new Vector3(cumulative_row_densities.Length * 0.5f, 0, marginal_cumulative_col.GetLength(1) * 0.5f);
+        float tileRadiusBase = center_offset.magnitude;
+        float tileRadiusSqr1 = (center_offset * 0.25f).sqrMagnitude;
+        float tileRadiusSqr2 = (center_offset * 2).sqrMagnitude;
+
+        cellSize = 3.0f / tileRadiusBase;
+        float meanMass = (tileRadiusBase * temp);
+
+        float fudgeFactor1 = tileRadiusBase / 15;
+        float fudgeFactor2 = tileRadiusBase / 75;
+
+        float totalMass = 0;
+
+        for (int i = 1; i < cpu_particles.Length; i++)
+        {
+            if (cpu_particles[i].position.magnitude > tileRadiusBase * 2.5f)
+            {
+                float rand1 = Random.value, rand2 = Random.value;
+                int row;
+                for (row = 1; row < cumulative_row_densities.Length; row++)
+                {
+                    if (cumulative_row_densities[row] > rand1)
+                    {
+                        break;
+                    }
+                }
+                row -= 1;
+
+                int col, width = marginal_cumulative_col.GetLength(1);
+                for (col = 1; col < width; col++)
+                {
+                    if (marginal_cumulative_col[row, col] > rand2)
+                    {
+                        break;
+                    }
+                }
+                col -= 1;
+
+                PhysicalParticle p = cpu_particles[i];
+
+                Vector3 unit_position = new Vector3(row + Random.value, 0, col + Random.value);
+                float y_range_1 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr1) * fudgeFactor1;
+                float y_range_2 = Mathf.Exp(-(unit_position - center_offset).sqrMagnitude / tileRadiusSqr2) * fudgeFactor2;
+                p.position = cellSize * (new Vector3(unit_position.x, sampleGaussian(0, Mathf.Max(y_range_1, y_range_2)), unit_position.z) - center_offset);
+
+                float hue_mean = h_mean[row, col];
+                float hue_std = h_std[row, col];
+                float hue_sample = sampleGaussian(hue_mean, hue_std);
+
+                float sat_mean = s_mean[row, col];
+                float sat_std = s_std[row, col];
+                float sat_sample = sampleGaussian(sat_mean, sat_std);
+
+                float value_mean = v_mean[row, col];
+                float value_std = v_std[row, col];
+                float value_sample = sampleGaussian(value_mean, value_std);
+                p.color = Color.HSVToRGB(hue_sample, sat_sample, value_sample);
+                p.mass = Mathf.Max(1, sampleGaussian(meanMass, meanMass / 2));
+                //p.mass = Mathf.Max(0.001f, sampleGaussian(1, 0.5f));
+                p.size = Mathf.Pow(Random.value * 0.9f + 0.1f, 5) * 0.01f;
+                p.totalForce = Vector3.zero;
+
+                totalMass += p.mass;
+            }
+        }
     }
 
     void ReadDistributionFile(string file_path)
